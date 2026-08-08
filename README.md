@@ -1,5 +1,7 @@
 # Artifact — IISWC 2026 "From Chat to Agents on the Edge"
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21848837.svg)](https://doi.org/10.5281/zenodo.21848837)
+
 All measured numbers used by the paper, organized as CSVs/JSON.
 Each row is either a per-cell measurement or a per-condition aggregate;
 no plotting is required to inspect the data.

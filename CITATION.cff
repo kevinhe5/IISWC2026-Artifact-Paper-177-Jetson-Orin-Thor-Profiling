@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this artifact, please cite it using this metadata."
+title: "Artifact: From Chat to Agents on the Edge — A Cross-Framework Characterization of LLM Inference on Edge GPUs (IISWC 2026)"
+authors:
+  - family-names: He
+    given-names: Kevin
+  - family-names: Do
+    given-names: Haebin
+doi: 10.5281/zenodo.21848837
+repository-code: "https://github.com/kevinhe5/IISWC2026-Artifact-Paper-177-Jetson-Orin-Thor-Profiling"
+license: MIT
