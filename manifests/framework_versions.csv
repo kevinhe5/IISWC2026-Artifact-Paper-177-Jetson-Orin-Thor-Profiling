@@ -1,0 +1,46 @@
+device,category,key,value
+orin,platform,JetPack,R36.4 (JP6)
+orin,platform,kernel,5.15-tegra
+orin,platform,CUDA,12.8 (cu128)
+orin,platform,GPU_arch,sm_87 (Ampere)
+orin,platform,memory,32 GB LPDDR5 unified
+orin,vllm,version,0.8.6+cu128
+orin,vllm,engine,"V1 default, V0 fallback for GGUF only"
+orin,vllm,attention_backend,FLASH_ATTN (V1 auto-selected)
+orin,vllm,sampling_backend,FlashInfer top-p/top-k
+orin,vllm,cuda_graphs,OFF (--enforce-eager used in agentic runs)
+orin,sglang,version,0.4.6.post2
+orin,sglang,attention_backend,triton (--attention-backend triton)
+orin,sglang,cuda_graphs,OFF (--disable-cuda-graph)
+orin,sglang,reasoning_parser,qwen3 (--reasoning-parser qwen3 for Qwen3 models)
+orin,llamacpp,version,b5283
+orin,llamacpp,backend,native C++ scheduler + flash-attention (-fa)
+orin,llamacpp,cuda_graphs,N/A (no CUDA-graph path)
+orin,llamacpp,chat_template_notes,"Qwen3 template needs 4 minja fixes: [::-1] slice, |reverse|list, .startswith, .strip/.split"
+orin,pytorch,torch,2.6.0
+orin,pytorch,transformers,4.57.3
+orin,pytorch,bitsandbytes,0.45.4.dev0
+orin,pytorch,accelerate,1.4.0
+orin,pytorch,numpy,2.2.3
+orin,pytorch,attention,SDPA / flash-attn in eager mode
+orin,pytorch,kv_cache,HF DynamicCache (~64K context ceiling)
+orin,trtllm,version,0.12.0
+orin,trtllm,quantization,"INT4-AWQ, INT8-SQ only (no FP8/NVFP4 on sm_87)"
+orin,trtllm,qwen3_support,NOT supported (assert on model_type in qwen/config.py)
+thor,platform,JetPack,R39.2 (JP7)
+thor,platform,kernel,6.8.12-tegra
+thor,platform,CUDA,"13.0 (driver 595.78, cu130)"
+thor,platform,GPU_arch,sm_110 (Blackwell)
+thor,platform,memory,128 GB LPDDR5X unified
+thor,vllm,version,0.12.0
+thor,vllm,attention_backend,FlashInfer
+thor,vllm,cuda_graphs,ON by default
+thor,sglang,version,0.5.7
+thor,sglang,attention_backend,flashinfer
+thor,sglang,cuda_graphs,ON by default
+thor,llamacpp,version,llama-cpp-python 0.3.16
+thor,pytorch,torch,2.10.0 (nightly)
+thor,pytorch,transformers,5.11.0
+thor,pytorch,bitsandbytes,0.49.0
+thor,trtllm,status,NOT supported
+thor,tensorrt_edge_llm,version,0.7.0

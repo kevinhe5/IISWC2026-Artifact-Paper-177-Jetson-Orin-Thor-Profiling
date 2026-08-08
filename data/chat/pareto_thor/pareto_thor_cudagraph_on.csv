@@ -1,0 +1,14 @@
+framework,quant,tpot_ms,tps,pdecode_w,tok_per_j
+vllm,gguf_Q8_0,6.670,149.9,71.66,2.092
+vllm,gguf_Q4_K_M,6.358,157.3,72.28,2.176
+vllm,gguf_Q4_0,4.917,203.4,76.02,2.675
+vllm,gguf_Q6_K,8.308,120.4,75.30,1.599
+vllm,gguf_Q5_K_M,6.645,150.5,70.26,2.142
+vllm,gguf_Q3_K_L,6.804,147.0,71.32,2.061
+sglang,gguf_Q8_0,6.161,162.3,78.06,2.079
+sglang,gguf_Q4_K_M,6.294,158.9,78.72,2.018
+sglang,gguf_Q4_0,4.395,227.5,83.50,2.725
+sglang,gguf_Q6_K,7.752,129.0,79.76,1.617
+sglang,gguf_Q5_K_M,6.624,151.0,76.63,1.970
+sglang,gguf_Q3_K_L,6.860,145.8,73.29,1.989
+sglang,fp8,6.583,151.9,75.38,2.015

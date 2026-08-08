@@ -1,0 +1,7 @@
+framework,tier,rho_c,rho_pi,rho_l,mbu_pred_pct,mbu_meas_pct,abs_err_pp,mbu_pred_sustained137_pct,abs_err_sustained_pp
+trtedge_llm,1,0.4,0.1,0.5,86.6,84.5,2.1,84.8,0.3
+llamacpp,1,0.4,0.1,0.5,74.9,81.8,6.9,72.0,9.8
+vllm,2,0.1,0.4,0.5,78.1,70.2,7.9,75.4,5.2
+sglang,2,0.1,0.4,0.5,72.6,71.8,0.8,69.5,2.3
+pytorch_compile,2,0.1,0.4,0.5,76.5,67.0,9.5,73.7,6.7
+pytorch_eager,3,0.1,0.7,0.2,68.0,57.2,10.8,64.7,7.5

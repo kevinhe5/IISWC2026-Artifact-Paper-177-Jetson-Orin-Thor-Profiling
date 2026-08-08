@@ -1,0 +1,12 @@
+{
+  "framework": "vllm",
+  "n_profiled_runs": 3,
+  "median_tpots_ms": [
+    26.439,
+    27.984,
+    27.333
+  ],
+  "median_of_medians_ms": 27.333,
+  "stdev_of_medians_ms": 0.7756784127459015,
+  "max_minus_min_ms": 1.5450000000000017
+}

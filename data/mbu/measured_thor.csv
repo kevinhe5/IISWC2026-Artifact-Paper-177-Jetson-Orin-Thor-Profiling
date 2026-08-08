@@ -1,0 +1,6 @@
+framework,quant,pp,gen,weight_bytes,tpot_ms,peak_bw_gb_s,mbu_measured_firstprinciples_pct,paper_table3b_mmeas_pct,delta_pp
+trtedge_llm,fp16,128,128,2.470e+09,10.36,273.1,87.3,84.5,+2.8
+llamacpp,f16,128,128,2.310e+09,11.10,273.1,76.2,81.8,-5.6
+vllm,fp16,128,128,2.470e+09,11.35,273.1,79.7,70.2,+9.5
+sglang,fp16,128,128,2.470e+09,10.89,273.1,83.1,71.8,+11.3
+pytorch,bf16,128,128,2.470e+09,13.77,273.1,65.7,57.2,+8.5

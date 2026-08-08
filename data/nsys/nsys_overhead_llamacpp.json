@@ -1,0 +1,12 @@
+{
+  "framework": "llamacpp",
+  "n_profiled_runs": 3,
+  "median_tpots_ms": [
+    11.953,
+    11.943,
+    11.918
+  ],
+  "median_of_medians_ms": 11.943,
+  "stdev_of_medians_ms": 0.018027756377320053,
+  "max_minus_min_ms": 0.03500000000000014
+}

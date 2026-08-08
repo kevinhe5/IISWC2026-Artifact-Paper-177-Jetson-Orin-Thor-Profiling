@@ -1,0 +1,90 @@
+[Tue May  5 05:48:43 PM EDT 2026] vLLM agent multi-turn launching
+GPU MinFreq=1300500000 MaxFreq=1300500000 CurrentFreq=1300500000
+EMC MinFreq=204000000 MaxFreq=3199000000 CurrentFreq=3199000000 FreqOverride=1
+NV Power Mode: MAXN
+[Tue May  5 05:48:43 PM EDT 2026] vLLM agent sweep started; out=/nvme/ispass/jetson-containers/data/benchmarks/sweep_results/vllm_agent_20260505_174843.csv
+  Llama-3.2-1B  cache=on...
+    d=8 t=23: pp_tok=14322 TTFT=  202.7ms TPOT= 19.5ms gen=150/150 dec_tps=51.2
+    d=8 t=24: pp_tok=14974 TTFT=  179.2ms TPOT= 19.8ms gen=150/150 dec_tps=50.5
+    d=8 t=25: pp_tok=15477 TTFT=  158.5ms TPOT= 20.0ms gen=150/150 dec_tps=50.0
+    d=8 t=26: pp_tok=15878 TTFT=  136.2ms TPOT= 20.2ms gen=150/150 dec_tps=49.5
+    d=8 t=27: pp_tok=16368 TTFT=  149.5ms TPOT= 20.2ms gen=150/150 dec_tps=49.4
+    d=8 t=28: pp_tok=17071 TTFT=  189.4ms TPOT= 20.1ms gen=150/150 dec_tps=49.8
+    d=8 t=29: pp_tok=17447 TTFT=  145.5ms TPOT= 20.5ms gen=150/150 dec_tps=48.8
+    d=9 t=0: pp_tok= 1524 TTFT=   29.9ms TPOT= 20.2ms gen=150/150 dec_tps=49.4
+    d=9 t=1: pp_tok= 1901 TTFT=   60.2ms TPOT= 20.0ms gen=150/150 dec_tps=50.0
+    d=9 t=2: pp_tok= 2665 TTFT=  120.1ms TPOT= 19.6ms gen=150/150 dec_tps=51.0
+    d=9 t=3: pp_tok= 3310 TTFT=  102.2ms TPOT= 19.9ms gen=150/150 dec_tps=50.1
+    d=9 t=4: pp_tok= 3813 TTFT=   90.6ms TPOT= 19.9ms gen=150/150 dec_tps=50.2
+    d=9 t=5: pp_tok= 4214 TTFT=   78.8ms TPOT= 20.1ms gen=150/150 dec_tps=49.8
+    d=9 t=6: pp_tok= 4704 TTFT=   86.2ms TPOT= 20.1ms gen=150/150 dec_tps=49.9
+    d=9 t=7: pp_tok= 5407 TTFT=  115.1ms TPOT= 19.7ms gen=150/150 dec_tps=50.7
+    d=9 t=8: pp_tok= 5783 TTFT=   86.7ms TPOT= 20.2ms gen=150/150 dec_tps=49.4
+    d=9 t=9: pp_tok= 6545 TTFT=  147.6ms TPOT= 19.7ms gen=150/150 dec_tps=50.8
+    d=9 t=10: pp_tok= 7191 TTFT=  128.7ms TPOT= 19.8ms gen=150/150 dec_tps=50.6
+    d=9 t=11: pp_tok= 7698 TTFT=  113.3ms TPOT= 19.9ms gen=150/150 dec_tps=50.2
+    d=9 t=12: pp_tok= 8098 TTFT=   99.0ms TPOT= 20.0ms gen=150/150 dec_tps=50.0
+    d=9 t=13: pp_tok= 8588 TTFT=  108.9ms TPOT= 19.9ms gen=150/150 dec_tps=50.1
+    d=9 t=14: pp_tok= 9291 TTFT=  143.2ms TPOT= 19.7ms gen=150/150 dec_tps=50.7
+    d=9 t=15: pp_tok= 9667 TTFT=  107.2ms TPOT= 19.9ms gen=150/150 dec_tps=50.2
+    d=9 t=16: pp_tok=10429 TTFT=  156.9ms TPOT= 20.1ms gen=150/150 dec_tps=49.8
+    d=9 t=17: pp_tok=11077 TTFT=  155.8ms TPOT= 19.7ms gen=150/150 dec_tps=50.9
+    d=9 t=18: pp_tok=11584 TTFT=  124.8ms TPOT= 19.8ms gen=150/150 dec_tps=50.4
+    d=9 t=19: pp_tok=11985 TTFT=  119.4ms TPOT= 20.1ms gen=150/150 dec_tps=49.9
+    d=9 t=20: pp_tok=12474 TTFT=  129.8ms TPOT= 19.9ms gen=150/150 dec_tps=50.3
+    d=9 t=21: pp_tok=13178 TTFT=  170.6ms TPOT= 19.7ms gen=150/150 dec_tps=50.7
+    d=9 t=22: pp_tok=13554 TTFT=  127.9ms TPOT= 19.9ms gen=150/150 dec_tps=50.3
+    d=9 t=23: pp_tok=14317 TTFT=  183.0ms TPOT= 19.9ms gen=150/150 dec_tps=50.2
+    d=9 t=24: pp_tok=14965 TTFT=  180.3ms TPOT= 19.7ms gen=150/150 dec_tps=50.7
+    d=9 t=25: pp_tok=15472 TTFT=  145.6ms TPOT= 20.1ms gen=150/150 dec_tps=49.7
+    d=9 t=26: pp_tok=15874 TTFT=  139.5ms TPOT= 20.2ms gen=150/150 dec_tps=49.5
+    d=9 t=27: pp_tok=16363 TTFT=  149.8ms TPOT= 20.8ms gen=150/150 dec_tps=48.1
+    d=9 t=28: pp_tok=17069 TTFT=  199.5ms TPOT= 20.0ms gen=150/150 dec_tps=49.9
+    d=9 t=29: pp_tok=17445 TTFT=  149.6ms TPOT= 20.5ms gen=150/150 dec_tps=48.9
+
+  Done. Rows written to /benchmarks/sweep_results/vllm_agent_20260505_174843.csv
+[rank0]:[W505 22:07:19.752622904 ProcessGroupNCCL.cpp:1505] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+  Llama-3.2-1B  cache=off...
+    d=8 t=23: pp_tok=14322 TTFT= 1966.4ms TPOT= 20.7ms gen=150/150 dec_tps=48.3
+    d=8 t=24: pp_tok=14974 TTFT= 2085.0ms TPOT= 20.8ms gen=150/150 dec_tps=48.2
+    d=8 t=25: pp_tok=15477 TTFT= 2178.4ms TPOT= 20.9ms gen=150/150 dec_tps=47.8
+    d=8 t=26: pp_tok=15878 TTFT= 2265.4ms TPOT= 20.9ms gen=150/150 dec_tps=47.8
+    d=8 t=27: pp_tok=16368 TTFT= 2329.7ms TPOT= 20.8ms gen=150/150 dec_tps=48.1
+    d=8 t=28: pp_tok=17071 TTFT= 2477.5ms TPOT= 21.3ms gen=150/150 dec_tps=47.0
+    d=8 t=29: pp_tok=17447 TTFT= 2571.9ms TPOT= 21.2ms gen=150/150 dec_tps=47.1
+    d=9 t=0: pp_tok= 1524 TTFT=  162.8ms TPOT= 20.9ms gen=150/150 dec_tps=47.9
+    d=9 t=1: pp_tok= 1901 TTFT=  209.7ms TPOT= 21.0ms gen=150/150 dec_tps=47.7
+    d=9 t=2: pp_tok= 2665 TTFT=  298.7ms TPOT= 21.4ms gen=150/150 dec_tps=46.7
+    d=9 t=3: pp_tok= 3310 TTFT=  371.8ms TPOT= 21.3ms gen=150/150 dec_tps=47.0
+    d=9 t=4: pp_tok= 3813 TTFT=  431.9ms TPOT= 21.0ms gen=150/150 dec_tps=47.7
+    d=9 t=5: pp_tok= 4214 TTFT=  479.9ms TPOT= 21.0ms gen=150/150 dec_tps=47.7
+    d=9 t=6: pp_tok= 4704 TTFT=  545.4ms TPOT= 21.0ms gen=150/150 dec_tps=47.7
+    d=9 t=7: pp_tok= 5407 TTFT=  633.0ms TPOT= 20.8ms gen=150/150 dec_tps=48.0
+    d=9 t=8: pp_tok= 5783 TTFT=  683.9ms TPOT= 21.0ms gen=150/150 dec_tps=47.7
+    d=9 t=9: pp_tok= 6545 TTFT=  771.4ms TPOT= 21.2ms gen=150/150 dec_tps=47.2
+    d=9 t=10: pp_tok= 7191 TTFT=  867.7ms TPOT= 20.9ms gen=150/150 dec_tps=47.9
+    d=9 t=11: pp_tok= 7698 TTFT=  943.5ms TPOT= 20.7ms gen=150/150 dec_tps=48.2
+    d=9 t=12: pp_tok= 8098 TTFT=  979.0ms TPOT= 20.8ms gen=150/150 dec_tps=48.1
+    d=9 t=13: pp_tok= 8589 TTFT= 1065.2ms TPOT= 20.8ms gen=150/150 dec_tps=48.2
+    d=9 t=14: pp_tok= 9293 TTFT= 1162.7ms TPOT= 20.8ms gen=150/150 dec_tps=48.1
+    d=9 t=15: pp_tok= 9669 TTFT= 1217.4ms TPOT= 20.9ms gen=150/150 dec_tps=47.9
+    d=9 t=16: pp_tok=10431 TTFT= 1337.0ms TPOT= 20.5ms gen=150/150 dec_tps=48.7
+    d=9 t=17: pp_tok=11079 TTFT= 1433.2ms TPOT= 20.8ms gen=150/150 dec_tps=48.1
+    d=9 t=18: pp_tok=11586 TTFT= 1515.1ms TPOT= 20.7ms gen=150/150 dec_tps=48.2
+    d=9 t=19: pp_tok=11987 TTFT= 1577.3ms TPOT= 20.8ms gen=150/150 dec_tps=48.2
+    d=9 t=20: pp_tok=12477 TTFT= 1668.7ms TPOT= 20.5ms gen=150/150 dec_tps=48.7
+    d=9 t=21: pp_tok=13181 TTFT= 1778.2ms TPOT= 20.7ms gen=150/150 dec_tps=48.3
+    d=9 t=22: pp_tok=13557 TTFT= 1842.1ms TPOT= 20.5ms gen=150/150 dec_tps=48.7
+    d=9 t=23: pp_tok=14320 TTFT= 1966.4ms TPOT= 20.7ms gen=150/150 dec_tps=48.3
+    d=9 t=24: pp_tok=14969 TTFT= 2091.3ms TPOT= 20.6ms gen=150/150 dec_tps=48.6
+    d=9 t=25: pp_tok=15477 TTFT= 2186.9ms TPOT= 20.7ms gen=150/150 dec_tps=48.4
+    d=9 t=26: pp_tok=15879 TTFT= 2269.3ms TPOT= 20.9ms gen=150/150 dec_tps=47.9
+    d=9 t=27: pp_tok=16368 TTFT= 2331.9ms TPOT= 21.4ms gen=150/150 dec_tps=46.7
+    d=9 t=28: pp_tok=17074 TTFT= 2497.9ms TPOT= 21.3ms gen=150/150 dec_tps=46.9
+    d=9 t=29: pp_tok=17450 TTFT= 2560.3ms TPOT= 21.3ms gen=150/150 dec_tps=46.9
+
+  Done. Rows written to /benchmarks/sweep_results/vllm_agent_20260505_174843.csv
+[rank0]:[W505 22:37:54.651924221 ProcessGroupNCCL.cpp:1505] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+[Tue May  5 06:37:58 PM EDT 2026] vLLM agent sweep done; CSV: /nvme/ispass/jetson-containers/data/benchmarks/sweep_results/vllm_agent_20260505_174843.csv
+[Tue May  5 06:37:58 PM EDT 2026] rows: 601
+-rw-rw-r--+ 1 root root 95801 May  5 18:37 /nvme/ispass/jetson-containers/data/benchmarks/sweep_results/vllm_agent_20260505_174843.csv

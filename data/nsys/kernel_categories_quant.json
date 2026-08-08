@@ -1,0 +1,142 @@
+{
+ "trtllm": {
+  "labels": {
+   "4bit": "int4 (W4A16)",
+   "8bit": "int8 (SmoothQuant)",
+   "fp16": "fp16"
+  },
+  "4bit": {
+   "matmul": 6.182,
+   "attention": 0.253,
+   "quantize": 0.0,
+   "copy_cast": 0.01,
+   "other": 0.557
+  },
+  "8bit": {
+   "matmul": 8.944,
+   "attention": 0.25,
+   "quantize": 0.0,
+   "copy_cast": 0.01,
+   "other": 0.593
+  },
+  "fp16": {
+   "matmul": 14.228,
+   "attention": 0.253,
+   "quantize": 0.0,
+   "copy_cast": 0.0,
+   "other": 0.61
+  }
+ },
+ "llamacpp": {
+  "labels": {
+   "4bit": "Q4_K_M",
+   "8bit": "Q8_0",
+   "fp16": "f16"
+  },
+  "4bit": {
+   "matmul": 8.358,
+   "attention": 1.003,
+   "quantize": 0.198,
+   "copy_cast": 0.349,
+   "other": 0.423
+  },
+  "8bit": {
+   "matmul": 12.442,
+   "attention": 1.009,
+   "quantize": 0.204,
+   "copy_cast": 0.349,
+   "other": 0.428
+  },
+  "fp16": {
+   "matmul": 17.962,
+   "attention": 1.056,
+   "quantize": 0.0,
+   "copy_cast": 0.345,
+   "other": 0.426
+  }
+ },
+ "vllm": {
+  "labels": {
+   "4bit": "gguf_Q4_K_M",
+   "8bit": "gguf_Q8_0",
+   "fp16": "fp16 (HF)"
+  },
+  "4bit": {
+   "matmul": 9.642,
+   "attention": 0.268,
+   "quantize": 0.296,
+   "copy_cast": 0.173,
+   "other": 0.429
+  },
+  "8bit": {
+   "matmul": 10.402,
+   "attention": 0.269,
+   "quantize": 0.333,
+   "copy_cast": 0.177,
+   "other": 0.446
+  },
+  "fp16": {
+   "matmul": 14.679,
+   "attention": 0.193,
+   "quantize": 0.0,
+   "copy_cast": 0.015,
+   "other": 0.569
+  }
+ },
+ "sglang": {
+  "labels": {
+   "4bit": "gguf_Q4_K_M",
+   "8bit": "gguf_Q8_0",
+   "fp16": "fp16 (HF)"
+  },
+  "4bit": {
+   "matmul": 9.813,
+   "attention": 0.22,
+   "quantize": 0.302,
+   "copy_cast": 0.152,
+   "other": 0.511
+  },
+  "8bit": {
+   "matmul": 10.65,
+   "attention": 0.222,
+   "quantize": 0.329,
+   "copy_cast": 0.153,
+   "other": 0.535
+  },
+  "fp16": {
+   "matmul": 15.464,
+   "attention": 0.222,
+   "quantize": 0.0,
+   "copy_cast": 0.166,
+   "other": 0.441
+  }
+ },
+ "pytorch": {
+  "labels": {
+   "4bit": "bnb-NF4",
+   "8bit": "bnb-int8",
+   "fp16": "bf16"
+  },
+  "4bit": {
+   "matmul": 9.513,
+   "attention": 0.242,
+   "quantize": 0.0,
+   "copy_cast": 0.439,
+   "other": 1.404
+  },
+  "8bit": {
+   "matmul": 15.58,
+   "attention": 0.233,
+   "quantize": 0.843,
+   "copy_cast": 0.619,
+   "other": 2.542
+  },
+  "fp16": {
+   "matmul": 15.15,
+   "attention": 0.241,
+   "quantize": 0.0,
+   "copy_cast": 0.445,
+   "other": 1.538
+  }
+ }
+}

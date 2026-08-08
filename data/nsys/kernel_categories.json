@@ -1,0 +1,564 @@
+{
+  "trtllm": {
+    "categories": {
+      "elementwise": {
+        "ms_per_tok": 0.07238047244094488,
+        "ms_total": 9.264700472440945,
+        "n_per_tok": 22.0,
+        "fraction": 0.010336336457790822,
+        "top": [
+          {
+            "name": "computeSeqAndPaddingOffsets",
+            "ms": 7.021221291338582,
+            "n": 2048
+          },
+          {
+            "name": "unrolled_elementwise_kernel",
+            "ms": 0.9150851023622046,
+            "n": 256
+          },
+          {
+            "name": "vectorized_elementwise_kernel",
+            "ms": 0.691675716535433,
+            "n": 256
+          }
+        ]
+      },
+      "norm": {
+        "ms_per_tok": 0.2229707086614173,
+        "ms_total": 28.540250708661414,
+        "n_per_tok": 34.0,
+        "fraction": 0.031841464793378696,
+        "top": [
+          {
+            "name": "__myl_AddCasMulMeaAddSqrDivMulCasMul_0xd2255b02fc7f12599e5d268f32225213_com_vec",
+            "ms": 23.520167307086613,
+            "n": 3968
+          },
+          {
+            "name": "__myl_GatCasMulMeaAddSqrDivMulCasMul_0x7d6691c544720e9a72ef15e7c54fdaed_com",
+            "ms": 3.6422148031496064,
+            "n": 128
+          },
+          {
+            "name": "__myl_AddCasMulMea_0xbc43a2ea9909e2b520b904fa02272084_com_vec",
+            "ms": 0.7515676220472441,
+            "n": 128
+          }
+        ]
+      },
+      "activation": {
+        "ms_per_tok": 0.08343811023622048,
+        "ms_total": 10.680078110236222,
+        "n_per_tok": 16.0,
+        "fraction": 0.011915429006179567,
+        "top": [
+          {
+            "name": "__myl_CasCasMulTanMulAddMulMulCas_0xb0016fc9564519383a2ef49d445c8b40_com_vec",
+            "ms": 10.680078110236222,
+            "n": 2048
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.25316081889763775,
+        "ms_total": 32.40458481889763,
+        "n_per_tok": 17.0,
+        "fraction": 0.036152781458988675,
+        "top": [
+          {
+            "name": "kernel_mha",
+            "ms": 20.62590790551181,
+            "n": 2048
+          },
+          {
+            "name": "addBiasSoftMax",
+            "ms": 11.778322141732284,
+            "n": 128
+          },
+          {
+            "name": "fmha_v2_flash_attention_fp16_64_32_S_q_paged_kv_64_causal_sm87_kernel_nl",
+            "ms": 0.0003547716535433262,
+            "n": 0
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 6.182105700787401,
+        "ms_total": 791.3095297007874,
+        "n_per_tok": 81.0,
+        "fraction": 0.8828392850447541,
+        "top": [
+          {
+            "name": "kernel",
+            "ms": 415.604865007874,
+            "n": 10240
+          },
+          {
+            "name": "ampere_fp16_s16816gemm_fp16_64x64_sliced1x2_ldg8_f2f_stages_64x5_tn",
+            "ms": 375.7046646929134,
+            "n": 128
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 0.0838508346456693,
+        "ms_total": 10.73290683464567,
+        "n_per_tok": 16.0,
+        "fraction": 0.01197436836118152,
+        "top": [
+          {
+            "name": "applyBiasRopeUpdateKVCache",
+            "ms": 10.73290683464567,
+            "n": 2048
+          }
+        ]
+      },
+      "sampling": {
+        "ms_per_tok": 0.0943196220472441,
+        "ms_total": 12.072911622047245,
+        "n_per_tok": 5.0,
+        "fraction": 0.013469369778532678,
+        "top": [
+          {
+            "name": "batchApplyPenalty",
+            "ms": 6.630940220472441,
+            "n": 128
+          },
+          {
+            "name": "topKStage1",
+            "ms": 3.6307976062992124,
+            "n": 128
+          },
+          {
+            "name": "topKStage2Sampling",
+            "ms": 0.933371968503937,
+            "n": 128
+          }
+        ]
+      },
+      "copy_cast": {
+        "ms_per_tok": 0.010300472440944881,
+        "ms_total": 1.3184604724409448,
+        "n_per_tok": 1.0,
+        "fraction": 0.0014709650991940708,
+        "top": [
+          {
+            "name": "copyVectorizedKernel",
+            "ms": 1.3184604724409448,
+            "n": 128
+          }
+        ]
+      }
+    },
+    "total_ms": 896.3234227401574,
+    "gen_tokens": 128,
+    "unclassified": []
+  },
+  "llamacpp": {
+    "categories": {
+      "copy_cast": {
+        "ms_per_tok": 0.34895725,
+        "ms_total": 44.666528,
+        "n_per_tok": 34.0,
+        "fraction": 0.033777087576307985,
+        "top": [
+          {
+            "name": "cpy_f32_f16",
+            "ms": 44.13904,
+            "n": 4096
+          },
+          {
+            "name": "k_get_rows_float",
+            "ms": 0.527488,
+            "n": 256
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 0.243001,
+        "ms_total": 31.104128,
+        "n_per_tok": 81.0,
+        "fraction": 0.02352112202320031,
+        "top": [
+          {
+            "name": "k_bin_bcast",
+            "ms": 31.104128,
+            "n": 10368
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 9.2871024921875,
+        "ms_total": 1188.749119,
+        "n_per_tok": 145.0,
+        "fraction": 0.8989389795132938,
+        "top": [
+          {
+            "name": "mul_mat_vec_q",
+            "ms": 1069.800128,
+            "n": 14464
+          },
+          {
+            "name": "mul_mat_vec",
+            "ms": 118.948991,
+            "n": 4096
+          }
+        ]
+      },
+      "quantize": {
+        "ms_per_tok": 0.19818975,
+        "ms_total": 25.368288,
+        "n_per_tok": 113.0,
+        "fraction": 0.019183646542596796,
+        "top": [
+          {
+            "name": "quantize_q8_1",
+            "ms": 25.368288,
+            "n": 14464
+          }
+        ]
+      },
+      "norm": {
+        "ms_per_tok": 0.0917315,
+        "ms_total": 11.741632,
+        "n_per_tok": 33.0,
+        "fraction": 0.008879090229551315,
+        "top": [
+          {
+            "name": "rms_norm_f32",
+            "ms": 11.741632,
+            "n": 4224
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 0.056671,
+        "ms_total": 7.253888,
+        "n_per_tok": 32.0,
+        "fraction": 0.0054854321841341595,
+        "top": [
+          {
+            "name": "rope_norm",
+            "ms": 7.253888,
+            "n": 4096
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.073815078125,
+        "ms_total": 9.44833,
+        "n_per_tok": 16.0,
+        "fraction": 0.007144881954107963,
+        "top": [
+          {
+            "name": "soft_max_f32",
+            "ms": 9.44833,
+            "n": 2048
+          }
+        ]
+      },
+      "activation": {
+        "ms_per_tok": 0.03171425,
+        "ms_total": 4.059424,
+        "n_per_tok": 16.0,
+        "fraction": 0.003069759976807834,
+        "top": [
+          {
+            "name": "unary_op_kernel",
+            "ms": 4.059424,
+            "n": 2048
+          }
+        ]
+      }
+    },
+    "total_ms": 1322.3913369999998,
+    "gen_tokens": 128,
+    "unclassified": []
+  },
+  "vllm": {
+    "categories": {
+      "copy_cast": {
+        "ms_per_tok": 0.1729375748031496,
+        "ms_total": 22.13600957480315,
+        "n_per_tok": 35.0,
+        "fraction": 0.016001808085456377,
+        "top": [
+          {
+            "name": "CatArrayBatchedCopy_alignedK_contig",
+            "ms": 19.325798803149606,
+            "n": 4096
+          },
+          {
+            "name": "index_elementwise_kernel",
+            "ms": 1.624660661417323,
+            "n": 128
+          },
+          {
+            "name": "indexSelectSmallIndex",
+            "ms": 1.1855501102362205,
+            "n": 256
+          }
+        ]
+      },
+      "activation": {
+        "ms_per_tok": 0.09161272440944883,
+        "ms_total": 11.72642872440945,
+        "n_per_tok": 16.0,
+        "fraction": 0.008476869389746445,
+        "top": [
+          {
+            "name": "act_and_mul_kernel",
+            "ms": 11.72642872440945,
+            "n": 2048
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.2678223622047244,
+        "ms_total": 34.28126236220472,
+        "n_per_tok": 18.0,
+        "fraction": 0.024781439463759224,
+        "top": [
+          {
+            "name": "flash_fwd_splitkv_kernel",
+            "ms": 22.378254110236217,
+            "n": 2048
+          },
+          {
+            "name": "cunn_SoftMaxForward",
+            "ms": 11.903008251968503,
+            "n": 256
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 9.642021543307088,
+        "ms_total": 1234.1787575433073,
+        "n_per_tok": 114.0,
+        "fraction": 0.8921703595500284,
+        "top": [
+          {
+            "name": "mul_mat_vec_q",
+            "ms": 1233.7452265826773,
+            "n": 14464
+          },
+          {
+            "name": "dequantize_block_q6_K",
+            "ms": 0.38392743307086613,
+            "n": 128
+          },
+          {
+            "name": "mul_mat_q4_K",
+            "ms": 0.04573329133858724,
+            "n": 0
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 0.07012031496062993,
+        "ms_total": 8.97540031496063,
+        "n_per_tok": 5.0,
+        "fraction": 0.00648818988105366,
+        "top": [
+          {
+            "name": "reduce_kernel",
+            "ms": 5.105873637795276,
+            "n": 128
+          },
+          {
+            "name": "unrolled_elementwise_kernel",
+            "ms": 2.2174840944881895,
+            "n": 256
+          },
+          {
+            "name": "elementwise_kernel",
+            "ms": 1.6520425826771654,
+            "n": 256
+          }
+        ]
+      },
+      "norm": {
+        "ms_per_tok": 0.1495652283464567,
+        "ms_total": 19.144349228346456,
+        "n_per_tok": 33.0,
+        "fraction": 0.013839179154568969,
+        "top": [
+          {
+            "name": "fused_add_rms_norm_kernel",
+            "ms": 18.550267968503938,
+            "n": 4096
+          },
+          {
+            "name": "rms_norm_kernel",
+            "ms": 0.5940812598425197,
+            "n": 128
+          }
+        ]
+      },
+      "quantize": {
+        "ms_per_tok": 0.2960813858267717,
+        "ms_total": 37.898417385826775,
+        "n_per_tok": 113.0,
+        "fraction": 0.027396229645691068,
+        "top": [
+          {
+            "name": "quantize_q8_1",
+            "ms": 37.898417385826775,
+            "n": 14464
+          }
+        ]
+      },
+      "kvcache": {
+        "ms_per_tok": 0.05788270866141732,
+        "ms_total": 7.408986708661417,
+        "n_per_tok": 16.0,
+        "fraction": 0.005355851650635699,
+        "top": [
+          {
+            "name": "reshape_and_cache_flash_kernel",
+            "ms": 7.408986708661417,
+            "n": 2048
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 0.05933329133858267,
+        "ms_total": 7.594661291338582,
+        "n_per_tok": 16.0,
+        "fraction": 0.005490073179060097,
+        "top": [
+          {
+            "name": "rotary_embedding_kernel",
+            "ms": 7.594661291338582,
+            "n": 2048
+          }
+        ]
+      }
+    },
+    "total_ms": 1383.3442731338585,
+    "gen_tokens": 128,
+    "unclassified": []
+  },
+  "pytorch": {
+    "categories": {
+      "copy_cast": {
+        "ms_per_tok": 0.43905108661417325,
+        "ms_total": 56.198539086614176,
+        "n_per_tok": 69.0,
+        "fraction": 0.03785599737488787,
+        "top": [
+          {
+            "name": "CatArrayBatchedCopy_contig",
+            "ms": 34.26894211023622,
+            "n": 4096
+          },
+          {
+            "name": "CatArrayBatchedCopy",
+            "ms": 19.011535622047244,
+            "n": 4096
+          },
+          {
+            "name": "CatArrayBatchedCopy_aligned16_contig",
+            "ms": 1.7332852913385828,
+            "n": 384
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 1.4037374488188976,
+        "ms_total": 179.6783934488189,
+        "n_per_tok": 490.0,
+        "fraction": 0.12103348060773153,
+        "top": [
+          {
+            "name": "vectorized_elementwise_kernel",
+            "ms": 83.52211653543306,
+            "n": 36352
+          },
+          {
+            "name": "elementwise_kernel",
+            "ms": 52.199198236220475,
+            "n": 16640
+          },
+          {
+            "name": "reduce_kernel",
+            "ms": 24.104314960629917,
+            "n": 4736
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 9.512890960629921,
+        "ms_total": 1217.65004296063,
+        "n_per_tok": 114.0,
+        "fraction": 0.820223400448306,
+        "top": [
+          {
+            "name": "kgemm_4bit_inference_naive",
+            "ms": 843.5065993070866,
+            "n": 14336
+          },
+          {
+            "name": "ampere_fp16_s16816gemm_fp16_64x64_sliced1x2_ldg8_f2f_stages_64x5_tn",
+            "ms": 373.8137640314961,
+            "n": 128
+          },
+          {
+            "name": "gemmk1_kernel",
+            "ms": 0.3131343622047244,
+            "n": 128
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.24184466141732283,
+        "ms_total": 30.956116661417322,
+        "n_per_tok": 16.0,
+        "fraction": 0.02085240453075165,
+        "top": [
+          {
+            "name": "flash_fwd_kernel",
+            "ms": 30.956116661417322,
+            "n": 2048
+          }
+        ]
+      },
+      "other": {
+        "ms_per_tok": 2.2677165354330713e-06,
+        "ms_total": 0.0002902677165354331,
+        "n_per_tok": 0.0,
+        "fraction": 1.9552775025422955e-07,
+        "top": [
+          {
+            "name": "indexSelectLargeIndex",
+            "ms": 0.0002902677165354331,
+            "n": 0
+          }
+        ]
+      },
+      "quantize": {
+        "ms_per_tok": 0.00040037795275586535,
+        "ms_total": 0.051248377952750765,
+        "n_per_tok": 0.0,
+        "fraction": 3.452151057265995e-05,
+        "top": [
+          {
+            "name": "kDequantizeBlockwise",
+            "ms": 0.051248377952750765,
+            "n": 0
+          }
+        ]
+      }
+    },
+    "total_ms": 1484.5346308031496,
+    "gen_tokens": 128,
+    "unclassified": [
+      {
+        "name": "indexSelectLargeIndex",
+        "ms": 0.0002902677165354331,
+        "n": 0
+      }
+    ]
+  }
+}

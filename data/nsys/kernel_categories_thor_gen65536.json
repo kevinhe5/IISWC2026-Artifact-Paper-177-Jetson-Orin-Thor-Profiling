@@ -1,0 +1,429 @@
+{
+  "llamacpp": {
+    "categories": {
+      "other": {
+        "ms_per_tok": 0.20717412899780285,
+        "ms_total": 13577.363718000008,
+        "n_per_tok": 1.0,
+        "fraction": 0.009670196109182535,
+        "top": [
+          {
+            "name": "cpy_flt",
+            "ms": 13577.363718000008,
+            "n": 65536
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 11.140114583496093,
+        "ms_total": 730078.5493439999,
+        "n_per_tok": 32.0,
+        "fraction": 0.5199833262111314,
+        "top": [
+          {
+            "name": "flash_attn_vec_ext_f32",
+            "ms": 726565.547074,
+            "n": 1048576
+          },
+          {
+            "name": "flash_attn_combine_results",
+            "ms": 3513.00227,
+            "n": 1048576
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 0.07579144622802735,
+        "ms_total": 4967.06822,
+        "n_per_tok": 32.0,
+        "fraction": 0.0035376914674098148,
+        "top": [
+          {
+            "name": "k_bin_bcast",
+            "ms": 4967.06822,
+            "n": 2097152
+          }
+        ]
+      },
+      "copy_cast": {
+        "ms_per_tok": 0.06760880313110351,
+        "ms_total": 4430.810522,
+        "n_per_tok": 34.0,
+        "fraction": 0.0031557530283707327,
+        "top": [
+          {
+            "name": "k_set_rows",
+            "ms": 4187.709714,
+            "n": 2097152
+          },
+          {
+            "name": "k_get_rows_float",
+            "ms": 243.100808,
+            "n": 131072
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 9.711415380233763,
+        "ms_total": 636447.3183589999,
+        "n_per_tok": 113.0,
+        "fraction": 0.45329642112595986,
+        "top": [
+          {
+            "name": "mul_mat_vec_f",
+            "ms": 636447.3183589999,
+            "n": 7405568
+          }
+        ]
+      },
+      "norm": {
+        "ms_per_tok": 0.145582366897583,
+        "ms_total": 9540.885997,
+        "n_per_tok": 33.0,
+        "fraction": 0.006795298451350177,
+        "top": [
+          {
+            "name": "rms_norm_f32",
+            "ms": 9540.885997,
+            "n": 2162688
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 0.049489722274780275,
+        "ms_total": 3243.358439,
+        "n_per_tok": 32.0,
+        "fraction": 0.002310014875415163,
+        "top": [
+          {
+            "name": "rope_norm",
+            "ms": 3243.358439,
+            "n": 2097152
+          }
+        ]
+      },
+      "activation": {
+        "ms_per_tok": 0.026807804290771484,
+        "ms_total": 1756.876262,
+        "n_per_tok": 16.0,
+        "fraction": 0.001251298731180352,
+        "top": [
+          {
+            "name": "unary_gated_op_kernel",
+            "ms": 1756.876262,
+            "n": 1048576
+          }
+        ]
+      }
+    },
+    "total_ms": 1404042.2308609998,
+    "gen_tokens": 65536,
+    "unclassified": [
+      {
+        "name": "cpy_flt",
+        "ms": 13577.363718000008,
+        "n": 65536
+      }
+    ],
+    "_note": "llama.cpp f16 GGUF, flash_attn=1; grid-aware attention split (flash/soft_max named + bmm gridY split)",
+    "_bundle5": {
+      "matmul": 9.7114,
+      "attention": 11.1401,
+      "quantize": 0.0,
+      "copy_cast": 0.0676,
+      "other": 0.5048
+    }
+  },
+  "vllm": {
+    "categories": {
+      "activation": {
+        "ms_per_tok": 0.08202414991760254,
+        "ms_total": 5375.534689,
+        "n_per_tok": 16.0,
+        "fraction": 0.0054389272373787986,
+        "top": [
+          {
+            "name": "act_and_mul_kernel",
+            "ms": 5375.534689,
+            "n": 1048576
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 4.3656650375976565,
+        "ms_total": 286108.223904,
+        "n_per_tok": 31.953857421875,
+        "fraction": 0.28948223792766925,
+        "top": [
+          {
+            "name": "flash_fwd_splitkv_kernel",
+            "ms": 280279.06176,
+            "n": 1048576
+          },
+          {
+            "name": "flash_fwd_splitkv_combine_kernel",
+            "ms": 5828.915168,
+            "n": 1045536
+          },
+          {
+            "name": "splitKreduce_kernel",
+            "ms": 0.246976,
+            "n": 16
+          }
+        ]
+      },
+      "norm": {
+        "ms_per_tok": 0.12480519700622558,
+        "ms_total": 8179.233391,
+        "n_per_tok": 33.0,
+        "fraction": 0.008275689367649441,
+        "top": [
+          {
+            "name": "fused_add_rms_norm_kernel",
+            "ms": 7971.103631,
+            "n": 2097152
+          },
+          {
+            "name": "rms_norm_kernel",
+            "ms": 208.12975999999998,
+            "n": 65536
+          }
+        ]
+      },
+      "copy_cast": {
+        "ms_per_tok": 0.011206712890625001,
+        "ms_total": 734.4431360000001,
+        "n_per_tok": 1.9999847412109375,
+        "fraction": 0.0007431042692125954,
+        "top": [
+          {
+            "name": "index_elementwise_kernel",
+            "ms": 586.076032,
+            "n": 65536
+          },
+          {
+            "name": "indexSelectSmallIndex",
+            "ms": 148.367104,
+            "n": 65535
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 10.352260618118287,
+        "ms_total": 678445.751869,
+        "n_per_tok": 112.999267578125,
+        "fraction": 0.6864465197248478,
+        "top": [
+          {
+            "name": "nvjet_sm110_hsh_128x8_64x12_2x1_v_bz_splitK_TNT",
+            "ms": 271800.689406,
+            "n": 1048560
+          },
+          {
+            "name": "nvjet_sm110_hsh_384x8_64x4_2x1_v_bz_TNT",
+            "ms": 145092.867008,
+            "n": 65536
+          },
+          {
+            "name": "nvjet_sm110_hsh_256x8_64x6_2x1_v_bz_splitK_TNT",
+            "ms": 142505.543488,
+            "n": 1048560
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 0.04883036279296875,
+        "ms_total": 3200.146656,
+        "n_per_tok": 7.0,
+        "fraction": 0.0032378853114913048,
+        "top": [
+          {
+            "name": "reduce_kernel",
+            "ms": 2077.766272,
+            "n": 65536
+          },
+          {
+            "name": "unrolled_elementwise_kernel",
+            "ms": 1122.380384,
+            "n": 393216
+          }
+        ]
+      },
+      "kvcache": {
+        "ms_per_tok": 0.046070383789062495,
+        "ms_total": 3019.2686719999997,
+        "n_per_tok": 16.0,
+        "fraction": 0.0030548742715229664,
+        "top": [
+          {
+            "name": "reshape_and_cache_flash_kernel",
+            "ms": 3019.2686719999997,
+            "n": 1048576
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 0.05008015380859375,
+        "ms_total": 3282.05296,
+        "n_per_tok": 16.0,
+        "fraction": 0.003320757519283066,
+        "top": [
+          {
+            "name": "rotary_embedding_kernel",
+            "ms": 3282.05296,
+            "n": 1048576
+          }
+        ]
+      },
+      "other": {
+        "ms_per_tok": 6.591796875e-08,
+        "ms_total": 0.00432,
+        "n_per_tok": 1.52587890625e-05,
+        "fraction": 4.370944850110781e-09,
+        "top": [
+          {
+            "name": "vectorized_gather_kernel",
+            "ms": 0.00432,
+            "n": 1
+          }
+        ]
+      }
+    },
+    "total_ms": 988344.659597,
+    "gen_tokens": 65536,
+    "unclassified": [
+      {
+        "name": "vectorized_gather_kernel",
+        "ms": 0.00432,
+        "n": 1
+      }
+    ],
+    "_note": "vLLM 0.12 fp16 enforce_eager; unified_attention named + grid split",
+    "_bundle5": {
+      "matmul": 10.3523,
+      "attention": 4.3657,
+      "quantize": 0.0,
+      "copy_cast": 0.0112,
+      "other": 0.3518
+    }
+  },
+  "pytorch": {
+    "categories": {
+      "copy_cast": {
+        "ms_per_tok": 8.233020239746093,
+        "ms_total": 539559.214432,
+        "n_per_tok": 66.0,
+        "fraction": 0.09778217529523997,
+        "top": [
+          {
+            "name": "CatArrayBatchedCopy_vectorized",
+            "ms": 533867.844448,
+            "n": 2162688
+          },
+          {
+            "name": "CatArrayBatchedCopy",
+            "ms": 5493.823328,
+            "n": 2097152
+          },
+          {
+            "name": "indexSelectSmallIndex",
+            "ms": 197.546656,
+            "n": 65536
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 13.224899174713142,
+        "ms_total": 866706.9923140005,
+        "n_per_tok": 36.49169921875,
+        "fraction": 0.15706986885818175,
+        "top": [
+          {
+            "name": "kernel",
+            "ms": 604813.4678040006,
+            "n": 948048
+          },
+          {
+            "name": "Kernel2",
+            "ms": 232944.534655,
+            "n": 393280
+          },
+          {
+            "name": "cunn_SoftMaxForward",
+            "ms": 27736.547968,
+            "n": 890048
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 43.92705942015034,
+        "ms_total": 2878803.766158973,
+        "n_per_tok": 571.0,
+        "fraction": 0.5217141825656474,
+        "top": [
+          {
+            "name": "elementwise_kernel",
+            "ms": 2787316.365461989,
+            "n": 11730944
+          },
+          {
+            "name": "vectorized_elementwise_kernel",
+            "ms": 51165.873081000165,
+            "n": 19857408
+          },
+          {
+            "name": "unrolled_elementwise_kernel",
+            "ms": 29899.577439999983,
+            "n": 3276800
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 18.812577774124154,
+        "ms_total": 1232901.0970050006,
+        "n_per_tok": 205.50830078125,
+        "fraction": 0.22343377328093086,
+        "top": [
+          {
+            "name": "kernel",
+            "ms": 392451.4656319998,
+            "n": 492064
+          },
+          {
+            "name": "nvjet_sm110_tst_64x8_64x16_2x1_v_bz_splitK_TNT",
+            "ms": 274878.304928,
+            "n": 2097152
+          },
+          {
+            "name": "nvjet_sm110_tst_384x8_64x4_2x1_v_bz_TNT",
+            "ms": 159310.50451199998,
+            "n": 101632
+          }
+        ]
+      }
+    },
+    "total_ms": 5517971.069909974,
+    "gen_tokens": 65536,
+    "unclassified": [],
+    "_note": "PyTorch eager bf16; attention via bmm -> grid-aware split (gridY=heads, gridX<=256)",
+    "_bundle5": {
+      "matmul": 18.8126,
+      "attention": 13.2249,
+      "quantize": 0.0,
+      "copy_cast": 8.233,
+      "other": 43.9271
+    }
+  },
+  "_platform": "thor",
+  "_gen_tokens": 65536,
+  "_pp": 128,
+  "_capture": "decode-only nsys (--capture-range=cudaProfilerApi), pp=128, gen=65536, Llama-3.2-1B; grid-aware attention split (attention QK/AV via bmm grows with KV length)",
+  "_missing": [
+    "trtedge_llm",
+    "sglang"
+  ],
+  "_missing_detail": {
+    "sglang": "CAPTURE FAILED: SGLang scheduler runs in a multiprocessing-spawn worker that nsys fork-trace does not follow (no CUPTI_ACTIVITY_KIND_KERNEL for the worker; confirmed at gen=128 and gen=65536). torch-profiler works at gen=128 (see kernel_categories_thor_gen128.json) but is infeasible at 65536 decode steps (multi-GB chrome trace). Paper Fig8 uses a hardcoded sglang-long value (10.24/4.79).",
+    "trtedge_llm": "OUT OF SCOPE for Fig8 long pane: Task 1 long-context set is {vllm, sglang, llamacpp, pytorch}. TRT-Edge fp16/int4 short-ctx are in kernel_categories_thor.json. A TRT-Edge deep-context trace is trivially addable via trt_long.sh (pastKVLen=65536) if wanted."
+  }
+}

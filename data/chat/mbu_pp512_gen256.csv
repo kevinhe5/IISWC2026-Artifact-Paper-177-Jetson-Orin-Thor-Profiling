@@ -1,0 +1,13 @@
+platform,framework,tpot_ms,source
+orin,TRT,16.25,sweep_locked.csv trtllm fp16 pp512/gen256
+orin,PyTorch (compile),18.10,figC pp512/gen256 measurement (pytorch_compile side sweep)
+orin,vLLM,20.42,figC pp512/gen256 measurement (sweep vllm=20.83, cross-check)
+orin,llama.cpp,21.00,sweep_locked.csv llamacpp fp16 pp512/gen256
+orin,SGLang,23.32,figC pp512/gen256 measurement (SGLang absent from Orin main sweep)
+orin,PyTorch,37.93,figC pp512/gen256 measurement (sweep pytorch=38.24, cross-check)
+thor,TRT,10.556,figC pp512/gen256 measurement (sweep trtedge=10.575, cross-check)
+thor,PyTorch (compile),16.501,figC pp512/gen256 measurement (Thor freshly measured, bf16 locked)
+thor,vLLM,11.853,figC pp512/gen256 measurement (sweep vllm=11.657, cross-check)
+thor,llama.cpp,11.406,figC pp512/gen256 measurement (Thor llamacpp_fa, sweep=10.99 cross-check)
+thor,SGLang,10.719,figC pp512/gen256 measurement (SGLang sparse in Thor sweep)
+thor,PyTorch,19.543,figC pp512/gen256 measurement (Thor freshly measured, bf16 eager locked)

@@ -1,0 +1,746 @@
+{
+  "trtedge_llm": {
+    "categories": {
+      "norm": {
+        "ms_per_tok": 0.134916,
+        "ms_total": 17.269248,
+        "n_per_tok": 33.7734375,
+        "fraction": 0.012774247302637768,
+        "top": [
+          {
+            "name": "__myl_AddCastMulMeanAddSqrtDivMulCastMul_0xfb0953842fdcbf394a377d2a480dbc9e",
+            "ms": 16.008928,
+            "n": 3930
+          },
+          {
+            "name": "__myl_CastMulMeanAddSqrtDivMulCastMul_0xd3a9cd7cbfabc4bfa8eb7d552a4dc542",
+            "ms": 0.831872,
+            "n": 262
+          },
+          {
+            "name": "__myl_AddCastMulMean_0x657528ee092665d7f6a03d64e32f1f91",
+            "ms": 0.428448,
+            "n": 131
+          }
+        ]
+      },
+      "copy_cast": {
+        "ms_per_tok": 0.24780719531250003,
+        "ms_total": 31.719321000000004,
+        "n_per_tok": 82.8984375,
+        "fraction": 0.023463120729156912,
+        "top": [
+          {
+            "name": "__myl_Slic_0x982fe0194ae04281d9d1835b9046200e_vec",
+            "ms": 13.873248,
+            "n": 4192
+          },
+          {
+            "name": "__myl_ReshSpliMulMulMulMulSubAddConcScat_0xf0aecceb831e7d48f5c7b30bb51a7b05",
+            "ms": 5.812512,
+            "n": 1965
+          },
+          {
+            "name": "__myl_ReshScat_0xcf78c3a43d473d1eba6fc4e72584b5a2",
+            "ms": 5.766214,
+            "n": 1965
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 9.9367440625,
+        "ms_total": 1271.90324,
+        "n_per_tok": 66.5234375,
+        "fraction": 0.9408404195009671,
+        "top": [
+          {
+            "name": "__myl_Fc_0x53794976315bf42c0f6960ab1b1a4c0d_tensorop128x32_cga2x2_sm2_acc_half_tile_k_count_4_gemm_325_8459680",
+            "ms": 547.893024,
+            "n": 2096
+          },
+          {
+            "name": "cutlass3x_sm100_tensorop_s128x64x16gemm_f16_f16_f32_f16_f16_128x64x64_0_nnn_align8_1sm_bias_f16_relu",
+            "ms": 352.560456,
+            "n": 4192
+          },
+          {
+            "name": "sm50_xmma_cublas_gemvx_f16f16_f16_f16_tn_n_int32_unit_n_launch_param8x32x32_strided_unit_stride_execute_kernel_trt",
+            "ms": 261.436672,
+            "n": 131
+          }
+        ]
+      },
+      "other": {
+        "ms_per_tok": 0.0039205,
+        "ms_total": 0.501824,
+        "n_per_tok": 2.046875,
+        "fraction": 0.00037120457581006974,
+        "top": [
+          {
+            "name": "__myl_ReshCastAddSqrtDivMulCastMulGath_0xaa7dfbfeb9e3aa5f1bd35c9aeb1934e4",
+            "ms": 0.378432,
+            "n": 131
+          },
+          {
+            "name": "kernelShapeCopyH2D",
+            "ms": 0.123392,
+            "n": 131
+          }
+        ]
+      },
+      "activation": {
+        "ms_per_tok": 0.03560725,
+        "ms_total": 4.557728,
+        "n_per_tok": 16.375,
+        "fraction": 0.0033714001101933693,
+        "top": [
+          {
+            "name": "__myl_SiluMul_0xf5f7cf6a45dabc4c47383daa65f56568",
+            "ms": 4.557728,
+            "n": 2096
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.19876725,
+        "ms_total": 25.442208,
+        "n_per_tok": 16.375,
+        "fraction": 0.01881987315933786,
+        "top": [
+          {
+            "name": "_gemv_mha_v1_0x950719bd2ec2453ec79d008c0bb0a328_vec",
+            "ms": 25.442208,
+            "n": 2096
+          }
+        ]
+      },
+      "sampling": {
+        "ms_per_tok": 0.003761609375,
+        "ms_total": 0.481486,
+        "n_per_tok": 2.0390625,
+        "fraction": 0.0003561603398571755,
+        "top": [
+          {
+            "name": "incrementLengthTensorKernel",
+            "ms": 0.481486,
+            "n": 261
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 3.775e-05,
+        "ms_total": 0.004832,
+        "n_per_tok": 0.0078125,
+        "fraction": 3.574282039747515e-06,
+        "top": [
+          {
+            "name": "initializeNormalRopeCosSinKernel",
+            "ms": 0.004832,
+            "n": 1
+          }
+        ]
+      }
+    },
+    "total_ms": 1351.879887,
+    "gen_tokens": 128,
+    "unclassified": [
+      {
+        "name": "__myl_ReshCastAddSqrtDivMulCastMulGath_0xaa7dfbfeb9e3aa5f1bd35c9aeb1934e4",
+        "ms": 0.378432,
+        "n": 131
+      },
+      {
+        "name": "kernelShapeCopyH2D",
+        "ms": 0.123392,
+        "n": 131
+      }
+    ],
+    "_source_trace": "trtedge_fp16_decode_g128.sqlite",
+    "_note": "TRT-Edge-LLM fp16 (eng_host); Myelin/cutlass GEMM->matmul, gemv_mha->attention (name-only, per trt_long.sh: cutlass gridY is weight not attention)"
+  },
+  "llamacpp": {
+    "categories": {
+      "other": {
+        "ms_per_tok": 0.00336475,
+        "ms_total": 0.430688,
+        "n_per_tok": 1.0,
+        "fraction": 0.00032786988129678804,
+        "top": [
+          {
+            "name": "cpy_flt",
+            "ms": 0.430688,
+            "n": 128
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.20721596874999998,
+        "ms_total": 26.523643999999997,
+        "n_per_tok": 32.0,
+        "fraction": 0.02019165616371541,
+        "top": [
+          {
+            "name": "flash_attn_vec_ext_f32",
+            "ms": 22.817306,
+            "n": 2048
+          },
+          {
+            "name": "flash_attn_combine_results",
+            "ms": 3.706338,
+            "n": 2048
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 0.067033046875,
+        "ms_total": 8.58023,
+        "n_per_tok": 32.0,
+        "fraction": 0.006531872240691962,
+        "top": [
+          {
+            "name": "k_bin_bcast",
+            "ms": 8.58023,
+            "n": 4096
+          }
+        ]
+      },
+      "copy_cast": {
+        "ms_per_tok": 0.06635396874999999,
+        "ms_total": 8.493307999999999,
+        "n_per_tok": 34.0,
+        "fraction": 0.0064657011241944515,
+        "top": [
+          {
+            "name": "k_set_rows",
+            "ms": 8.062534,
+            "n": 4096
+          },
+          {
+            "name": "k_get_rows_float",
+            "ms": 0.430774,
+            "n": 256
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 9.696023671875,
+        "ms_total": 1241.09103,
+        "n_per_tok": 113.0,
+        "fraction": 0.9448054477594184,
+        "top": [
+          {
+            "name": "mul_mat_vec_f",
+            "ms": 1241.09103,
+            "n": 14464
+          }
+        ]
+      },
+      "norm": {
+        "ms_per_tok": 0.14629565625,
+        "ms_total": 18.725844,
+        "n_per_tok": 33.0,
+        "fraction": 0.014255424459149478,
+        "top": [
+          {
+            "name": "rms_norm_f32",
+            "ms": 18.725844,
+            "n": 4224
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 0.048764984375,
+        "ms_total": 6.241918,
+        "n_per_tok": 32.0,
+        "fraction": 0.004751785314947908,
+        "top": [
+          {
+            "name": "rope_norm",
+            "ms": 6.241918,
+            "n": 4096
+          }
+        ]
+      },
+      "activation": {
+        "ms_per_tok": 0.02740325,
+        "ms_total": 3.507616,
+        "n_per_tok": 16.0,
+        "fraction": 0.002670243056585543,
+        "top": [
+          {
+            "name": "unary_gated_op_kernel",
+            "ms": 3.507616,
+            "n": 2048
+          }
+        ]
+      }
+    },
+    "total_ms": 1313.594278,
+    "gen_tokens": 128,
+    "unclassified": [
+      {
+        "name": "cpy_flt",
+        "ms": 0.430688,
+        "n": 128
+      }
+    ],
+    "_source_trace": "llamacpp_decode_g128.sqlite",
+    "_note": "llama.cpp f16 GGUF, flash_attn=1; grid-aware attention split"
+  },
+  "vllm": {
+    "categories": {
+      "activation": {
+        "ms_per_tok": 0.0822137265625,
+        "ms_total": 10.523357,
+        "n_per_tok": 16.0,
+        "fraction": 0.007515224098804531,
+        "top": [
+          {
+            "name": "act_and_mul_kernel",
+            "ms": 10.523357,
+            "n": 2048
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.1275442421875,
+        "ms_total": 16.325663,
+        "n_per_tok": 16.0,
+        "fraction": 0.011658923669182891,
+        "top": [
+          {
+            "name": "flash_fwd_splitkv_kernel",
+            "ms": 16.325663,
+            "n": 2048
+          }
+        ]
+      },
+      "norm": {
+        "ms_per_tok": 0.1126163671875,
+        "ms_total": 14.414895,
+        "n_per_tok": 33.0,
+        "fraction": 0.010294354385747528,
+        "top": [
+          {
+            "name": "fused_add_rms_norm_kernel",
+            "ms": 14.006798999999999,
+            "n": 4096
+          },
+          {
+            "name": "rms_norm_kernel",
+            "ms": 0.40809599999999996,
+            "n": 128
+          }
+        ]
+      },
+      "copy_cast": {
+        "ms_per_tok": 0.011228499999999999,
+        "ms_total": 1.4372479999999999,
+        "n_per_tok": 2.0,
+        "fraction": 0.0010264063839665056,
+        "top": [
+          {
+            "name": "index_elementwise_kernel",
+            "ms": 1.159616,
+            "n": 128
+          },
+          {
+            "name": "indexSelectSmallIndex",
+            "ms": 0.277632,
+            "n": 128
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 10.458569500000001,
+        "ms_total": 1338.6968960000002,
+        "n_per_tok": 113.0,
+        "fraction": 0.9560264061947176,
+        "top": [
+          {
+            "name": "nvjet_sm110_hsh_128x8_64x12_2x1_v_bz_splitK_TNT",
+            "ms": 539.502912,
+            "n": 2048
+          },
+          {
+            "name": "nvjet_sm110_hsh_384x8_64x4_2x1_v_bz_TNT",
+            "ms": 282.107232,
+            "n": 128
+          },
+          {
+            "name": "nvjet_sm110_hsh_256x8_64x6_2x1_v_bz_splitK_TNT",
+            "ms": 280.43456,
+            "n": 2048
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 0.0477025,
+        "ms_total": 6.10592,
+        "n_per_tok": 7.0,
+        "fraction": 0.004360524605349088,
+        "top": [
+          {
+            "name": "reduce_kernel",
+            "ms": 4.001088,
+            "n": 128
+          },
+          {
+            "name": "unrolled_elementwise_kernel",
+            "ms": 2.104832,
+            "n": 768
+          }
+        ]
+      },
+      "kvcache": {
+        "ms_per_tok": 0.04843,
+        "ms_total": 6.19904,
+        "n_per_tok": 16.0,
+        "fraction": 0.0044270259763546215,
+        "top": [
+          {
+            "name": "reshape_and_cache_flash_kernel",
+            "ms": 6.19904,
+            "n": 2048
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 0.05131925,
+        "ms_total": 6.568864,
+        "n_per_tok": 16.0,
+        "fraction": 0.004691134685877285,
+        "top": [
+          {
+            "name": "rotary_embedding_kernel",
+            "ms": 6.568864,
+            "n": 2048
+          }
+        ]
+      }
+    },
+    "total_ms": 1400.2718830000001,
+    "gen_tokens": 128,
+    "unclassified": [],
+    "_source_trace": "vllm_decode_g128.sqlite",
+    "_note": "vLLM 0.12 fp16 enforce_eager; unified_attention->attention"
+  },
+  "sglang": {
+    "categories": {
+      "other": {
+        "ms_per_tok": 7.375e-05,
+        "ms_total": 0.00944,
+        "n_per_tok": 0.0234375,
+        "fraction": 6.503420658037187e-06,
+        "top": [
+          {
+            "name": "write_req_to_token_pool_triton",
+            "ms": 0.004768,
+            "n": 1
+          },
+          {
+            "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+            "ms": 0.0028799999999999997,
+            "n": 1
+          },
+          {
+            "name": "compute_position_kernel",
+            "ms": 0.001792,
+            "n": 1
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 0.05538290624999998,
+        "ms_total": 7.089011999999998,
+        "n_per_tok": 9.109375,
+        "fraction": 0.004883774055706939,
+        "top": [
+          {
+            "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4> >(at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4>)",
+            "ms": 4.022154999999999,
+            "n": 129
+          },
+          {
+            "name": "void at::native::vectorized_elementwise_kernel<2, at::native::CUDAFunctorOnSelf_add<long>, std::array<char*, 2ul> >(int, at::native::CUDAFunctorOnSelf_add<long>, std::array<char*, 2ul>)",
+            "ms": 0.887311,
+            "n": 130
+          },
+          {
+            "name": "void at::native::vectorized_elementwise_kernel<2, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul> >(int, at::native::neg_kernel_cuda(at::TensorIteratorBase&)::{lambda()#2}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>)",
+            "ms": 0.5642309999999998,
+            "n": 129
+          }
+        ]
+      },
+      "copy_cast": {
+        "ms_per_tok": 0.2156841875000002,
+        "ms_total": 27.607576000000027,
+        "n_per_tok": 37.4453125,
+        "fraction": 0.019019457635247015,
+        "top": [
+          {
+            "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_put_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_put_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_put_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_put_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1})",
+            "ms": 24.426104000000027,
+            "n": 4128
+          },
+          {
+            "name": "void at::native::index_elementwise_kernel<128, 4, at::native::gpu_index_kernel<at::native::index_put_kernel_impl<at::native::OpaqueType<4> >(at::TensorIterator&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_put_kernel_impl<at::native::OpaqueType<4> >(at::TensorIterator&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1}>(long, at::native::gpu_index_kernel<at::native::index_put_kernel_impl<at::native::OpaqueType<4> >(at::TensorIterator&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1}>(at::TensorIteratorBase&, c10::ArrayRef<long>, c10::ArrayRef<long>, at::native::index_put_kernel_impl<at::native::OpaqueType<4> >(at::TensorIterator&, c10::ArrayRef<long>, c10::ArrayRef<long>)::{lambda(char*, char const*, long)#1} const&, bool)::{lambda(int)#1})",
+            "ms": 1.2933909999999997,
+            "n": 128
+          },
+          {
+            "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#7}::operator()() const::{lambda(float)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+            "ms": 0.759819,
+            "n": 129
+          }
+        ]
+      },
+      "kvcache": {
+        "ms_per_tok": 0.002344523437500001,
+        "ms_total": 0.3000990000000001,
+        "n_per_tok": 1.0078125,
+        "fraction": 0.00020674470720935406,
+        "top": [
+          {
+            "name": "create_flashinfer_kv_indices_triton",
+            "ms": 0.3000990000000001,
+            "n": 129
+          }
+        ]
+      },
+      "norm": {
+        "ms_per_tok": 0.18799994531249944,
+        "ms_total": 24.06399299999993,
+        "n_per_tok": 33.2578125,
+        "fraction": 0.016578206482104004,
+        "top": [
+          {
+            "name": "void flashinfer::norm::FusedAddRMSNormKernel<8u, __nv_bfloat16>(__nv_bfloat16*, __nv_bfloat16*, __nv_bfloat16*, unsigned int, unsigned int, unsigned int, float, float)",
+            "ms": 23.66712299999993,
+            "n": 4128
+          },
+          {
+            "name": "void flashinfer::norm::RMSNormKernel<8u, __nv_bfloat16>(__nv_bfloat16*, __nv_bfloat16*, __nv_bfloat16*, unsigned int, unsigned int, unsigned int, float, float)",
+            "ms": 0.39687,
+            "n": 129
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 10.565503820312497,
+        "ms_total": 1352.3844889999996,
+        "n_per_tok": 113.6328125,
+        "fraction": 0.9316869940012353,
+        "top": [
+          {
+            "name": "nvjet_sm110_tst_128x8_64x12_2x1_v_bz_splitK_TNT",
+            "ms": 543.7164109999995,
+            "n": 2048
+          },
+          {
+            "name": "nvjet_sm110_tst_256x8_64x6_2x1_v_bz_splitK_TNT",
+            "ms": 282.9281439999999,
+            "n": 2048
+          },
+          {
+            "name": "nvjet_sm110_tst_384x8_64x4_2x1_v_bz_TNT",
+            "ms": 279.15347799999995,
+            "n": 129
+          }
+        ]
+      },
+      "rope": {
+        "ms_per_tok": 0.04163321874999972,
+        "ms_total": 5.329051999999964,
+        "n_per_tok": 16.125,
+        "fraction": 0.0036712994559909063,
+        "top": [
+          {
+            "name": "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<false, 64u, 8u, 8u, __nv_bfloat16, long>(__nv_bfloat16*, __nv_bfloat16*, __nv_bfloat16*, __nv_bfloat16*, float*, long*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)",
+            "ms": 5.329051999999964,
+            "n": 2064
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.21110870312499874,
+        "ms_total": 27.02191399999984,
+        "n_per_tok": 24.5,
+        "fraction": 0.018615982386366865,
+        "top": [
+          {
+            "name": "void flashinfer::BatchPrefillWithPagedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)0, 16u, 1u, 4u, 4u, 4u, 1u, 4u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false> >, PagedParams>(PagedParams)",
+            "ms": 20.032097999999902,
+            "n": 2048
+          },
+          {
+            "name": "void flashinfer::PersistentVariableLengthMergeStatesKernel<8u, 8u, 16u, 4u, __nv_bfloat16, __nv_bfloat16, int>(__nv_bfloat16*, float*, int*, __nv_bfloat16*, float*, unsigned int, unsigned int*, unsigned int)",
+            "ms": 6.859126999999939,
+            "n": 1072
+          },
+          {
+            "name": "void flashinfer::BatchPrefillWithRaggedKVCacheKernel<flashinfer::KernelTraits<(flashinfer::MaskMode)1, 128u, 2u, 4u, 4u, 4u, 4u, 1u, (flashinfer::PosEncodingMode)0, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, int, flashinfer::DefaultAttention<false, false, false, false> >, RaggedParams>(RaggedParams)",
+            "ms": 0.130689,
+            "n": 16
+          }
+        ]
+      },
+      "activation": {
+        "ms_per_tok": 0.06045496093749952,
+        "ms_total": 7.738234999999938,
+        "n_per_tok": 16.125,
+        "fraction": 0.005331037855481567,
+        "top": [
+          {
+            "name": "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &(float silu<float>(float const&))>(__nv_bfloat16*, __nv_bfloat16 const*, int)",
+            "ms": 7.738234999999938,
+            "n": 2064
+          }
+        ]
+      }
+    },
+    "total_ms": 1451.5438099999992,
+    "gen_tokens": 128,
+    "unclassified": [
+      {
+        "name": "write_req_to_token_pool_triton",
+        "ms": 0.004768,
+        "n": 1
+      },
+      {
+        "name": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+        "ms": 0.0028799999999999997,
+        "n": 1
+      },
+      {
+        "name": "compute_position_kernel",
+        "ms": 0.001792,
+        "n": 1
+      }
+    ],
+    "_source_trace": "sgprof_g128/*.trace.json.gz",
+    "_note": "SGLang 0.5.7 fp16 flashinfer via torch-profiler (spawned scheduler escapes nsys fork-trace); flashinfer BatchPrefill/MergeStates->attention"
+  },
+  "pytorch": {
+    "categories": {
+      "copy_cast": {
+        "ms_per_tok": 0.16225900000000007,
+        "ms_total": 20.76915200000001,
+        "n_per_tok": 66.0,
+        "fraction": 0.013016802576742738,
+        "top": [
+          {
+            "name": "CatArrayBatchedCopy",
+            "ms": 10.614208,
+            "n": 4096
+          },
+          {
+            "name": "CatArrayBatchedCopy_vectorized",
+            "ms": 9.761567999999999,
+            "n": 4224
+          },
+          {
+            "name": "indexSelectSmallIndex",
+            "ms": 0.393376,
+            "n": 128
+          }
+        ]
+      },
+      "attention": {
+        "ms_per_tok": 0.17378875,
+        "ms_total": 22.24496,
+        "n_per_tok": 44.0,
+        "fraction": 0.013941746521357202,
+        "top": [
+          {
+            "name": "kernel",
+            "ms": 12.750592000000001,
+            "n": 2448
+          },
+          {
+            "name": "Kernel2",
+            "ms": 4.150944,
+            "n": 832
+          },
+          {
+            "name": "softmax_warp_forward",
+            "ms": 4.002048,
+            "n": 2048
+          }
+        ]
+      },
+      "elementwise": {
+        "ms_per_tok": 1.2999523359374998,
+        "ms_total": 166.39389899999998,
+        "n_per_tok": 571.0,
+        "fraction": 0.10428526563133005,
+        "top": [
+          {
+            "name": "elementwise_kernel",
+            "ms": 69.37689600000003,
+            "n": 22912
+          },
+          {
+            "name": "vectorized_elementwise_kernel",
+            "ms": 59.175339,
+            "n": 38784
+          },
+          {
+            "name": "unrolled_elementwise_kernel",
+            "ms": 18.495616,
+            "n": 6400
+          }
+        ]
+      },
+      "matmul": {
+        "ms_per_tok": 10.8293499140625,
+        "ms_total": 1386.156789,
+        "n_per_tok": 198.0,
+        "fraction": 0.86875618527057,
+        "top": [
+          {
+            "name": "nvjet_sm110_tst_64x8_64x16_2x1_v_bz_splitK_TNT",
+            "ms": 547.092416,
+            "n": 4096
+          },
+          {
+            "name": "nvjet_sm110_tst_384x8_64x4_2x1_v_bz_TNT",
+            "ms": 281.6312,
+            "n": 128
+          },
+          {
+            "name": "nvjet_sm110_tst_256x8_64x6_2x1_v_bz_splitK_TNT",
+            "ms": 276.694368,
+            "n": 2048
+          }
+        ]
+      }
+    },
+    "total_ms": 1595.5647999999999,
+    "gen_tokens": 128,
+    "unclassified": [],
+    "_source_trace": "pytorch_decode_g128.sqlite",
+    "_note": "PyTorch eager bf16; nvjet GEMM->matmul, elementwise->other"
+  },
+  "_platform": "thor",
+  "_gen_tokens": 128,
+  "_capture": "decode-only nsys (--capture-range=cudaProfilerApi) except sglang=torch-profiler chrome trace; pp=128, Llama-3.2-1B",
+  "_trtedge_variants": {
+    "fp16": {
+      "matmul": 9.9367,
+      "attention": 0.1988,
+      "quantize": 0.0,
+      "copy_cast": 0.2478,
+      "other": 0.1782
+    },
+    "int4_awq": {
+      "matmul": 2.9094,
+      "attention": 0.094,
+      "quantize": 0.0,
+      "copy_cast": 0.0029,
+      "other": 0.1983
+    },
+    "_note": "Fig7 quant kernel-mix: TRT-Edge fp16 (default column) vs int4_awq engine. int4 total=3.20 ms/tok."
+  }
+}

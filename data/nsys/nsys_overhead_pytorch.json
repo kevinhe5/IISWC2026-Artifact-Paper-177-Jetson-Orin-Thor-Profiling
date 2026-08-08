@@ -1,0 +1,12 @@
+{
+  "framework": "pytorch",
+  "n_profiled_runs": 3,
+  "median_tpots_ms": [
+    46.424,
+    46.556,
+    48.209
+  ],
+  "median_of_medians_ms": 46.556,
+  "stdev_of_medians_ms": 0.9946572273904238,
+  "max_minus_min_ms": 1.7850000000000037
+}

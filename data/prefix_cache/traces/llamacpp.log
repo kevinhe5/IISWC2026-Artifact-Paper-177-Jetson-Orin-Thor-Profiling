@@ -1,0 +1,110 @@
+[Wed May  6 02:58:51 AM EDT 2026] llama.cpp agent multi-turn launching
+GPU MinFreq=1300500000 MaxFreq=1300500000 CurrentFreq=1300500000
+EMC MinFreq=204000000 MaxFreq=3199000000 CurrentFreq=3199000000 FreqOverride=1
+NV Power Mode: MAXN
+[Wed May  6 02:58:52 AM EDT 2026] sweep started; out=/nvme/ispass/jetson-containers/data/benchmarks/sweep_results/llamacpp_agent_20260506_025851.csv
+  cache=on...
+    d=8 t=12: pp_tok= 8108 new= 251 TTFT=  110.9ms TPOT= 15.7ms gen=150/150 dec_tps=63.8
+    d=8 t=13: pp_tok= 8601 new= 343 TTFT=  253.8ms TPOT= 16.0ms gen=150/150 dec_tps=62.4
+    d=8 t=14: pp_tok= 9306 new= 555 TTFT=  621.9ms TPOT= 16.6ms gen=150/150 dec_tps=60.2
+    d=8 t=15: pp_tok= 9682 new= 226 TTFT=  130.3ms TPOT= 16.8ms gen=150/150 dec_tps=59.5
+    d=8 t=16: pp_tok=10443 new= 611 TTFT=  688.1ms TPOT= 16.9ms gen=150/150 dec_tps=59.3
+    d=8 t=17: pp_tok=11088 new= 495 TTFT=  543.0ms TPOT= 17.3ms gen=150/150 dec_tps=57.7
+    d=8 t=18: pp_tok=11594 new= 356 TTFT=  378.6ms TPOT= 17.9ms gen=150/150 dec_tps=56.0
+    d=8 t=19: pp_tok=11996 new= 252 TTFT=  219.0ms TPOT= 17.8ms gen=150/150 dec_tps=56.1
+    d=8 t=20: pp_tok=12487 new= 341 TTFT=  395.0ms TPOT= 18.2ms gen=150/150 dec_tps=55.0
+    d=8 t=21: pp_tok=13194 new= 557 TTFT=  855.8ms TPOT= 18.6ms gen=150/150 dec_tps=53.9
+    d=8 t=22: pp_tok=13569 new= 225 TTFT=  222.2ms TPOT= 18.8ms gen=150/150 dec_tps=53.1
+    d=8 t=23: pp_tok=14332 new= 613 TTFT=  932.5ms TPOT= 19.1ms gen=150/150 dec_tps=52.5
+    d=8 t=24: pp_tok=14984 new= 502 TTFT=  831.2ms TPOT= 19.5ms gen=150/150 dec_tps=51.3
+    d=8 t=25: pp_tok=15488 new= 354 TTFT=  570.5ms TPOT= 19.8ms gen=150/150 dec_tps=50.4
+    d=8 t=26: pp_tok=15890 new= 252 TTFT=  326.4ms TPOT= 20.2ms gen=150/150 dec_tps=49.5
+    d=8 t=27: pp_tok=16381 new= 341 TTFT=  594.4ms TPOT= 20.3ms gen=150/150 dec_tps=49.2
+    d=8 t=28: pp_tok=17085 new= 554 TTFT= 1797.1ms TPOT= 20.8ms gen=150/150 dec_tps=48.2
+    d=8 t=29: pp_tok=17461 new= 226 TTFT=  320.8ms TPOT= 20.9ms gen=150/150 dec_tps=47.8
+    d=9 t=0: pp_tok= 1524 new=1524 TTFT=  323.9ms TPOT= 12.2ms gen=150/150 dec_tps=82.1
+    d=9 t=1: pp_tok= 1900 new= 226 TTFT=    8.4ms TPOT= 12.2ms gen=150/150 dec_tps=81.7
+    d=9 t=2: pp_tok= 2664 new= 614 TTFT=  254.1ms TPOT= 12.8ms gen=150/150 dec_tps=78.2
+    d=9 t=3: pp_tok= 3310 new= 496 TTFT=  134.7ms TPOT= 13.1ms gen=150/150 dec_tps=76.2
+    d=9 t=4: pp_tok= 3812 new= 352 TTFT=   70.5ms TPOT= 13.4ms gen=150/150 dec_tps=74.5
+    d=9 t=5: pp_tok= 4214 new= 252 TTFT=   16.0ms TPOT= 13.5ms gen=150/150 dec_tps=74.1
+    d=9 t=6: pp_tok= 4704 new= 340 TTFT=   94.6ms TPOT= 13.8ms gen=150/150 dec_tps=72.6
+    d=9 t=7: pp_tok= 5408 new= 554 TTFT=  409.8ms TPOT= 14.2ms gen=150/150 dec_tps=70.2
+    d=9 t=8: pp_tok= 5785 new= 227 TTFT=   32.3ms TPOT= 14.4ms gen=150/150 dec_tps=69.5
+    d=9 t=9: pp_tok= 6547 new= 612 TTFT=  464.3ms TPOT= 14.7ms gen=150/150 dec_tps=68.1
+    d=9 t=10: pp_tok= 7193 new= 496 TTFT=  335.1ms TPOT= 15.3ms gen=150/150 dec_tps=65.5
+    d=9 t=11: pp_tok= 7700 new= 357 TTFT=  229.3ms TPOT= 15.7ms gen=150/150 dec_tps=63.8
+    d=9 t=12: pp_tok= 8101 new= 251 TTFT=  113.0ms TPOT= 15.7ms gen=150/150 dec_tps=63.5
+    d=9 t=13: pp_tok= 8592 new= 341 TTFT=  248.7ms TPOT= 16.0ms gen=150/150 dec_tps=62.5
+    d=9 t=14: pp_tok= 9296 new= 554 TTFT=  617.5ms TPOT= 16.4ms gen=150/150 dec_tps=61.0
+    d=9 t=15: pp_tok= 9673 new= 227 TTFT=  130.1ms TPOT= 16.7ms gen=150/150 dec_tps=59.8
+    d=9 t=16: pp_tok=10435 new= 612 TTFT=  681.6ms TPOT= 16.9ms gen=150/150 dec_tps=59.1
+    d=9 t=17: pp_tok=11083 new= 498 TTFT=  545.2ms TPOT= 17.5ms gen=150/150 dec_tps=57.1
+    d=9 t=18: pp_tok=11590 new= 357 TTFT=  380.0ms TPOT= 17.7ms gen=150/150 dec_tps=56.4
+    d=9 t=19: pp_tok=11992 new= 252 TTFT=  214.7ms TPOT= 17.9ms gen=150/150 dec_tps=56.0
+    d=9 t=20: pp_tok=12482 new= 340 TTFT=  394.0ms TPOT= 18.1ms gen=150/150 dec_tps=55.3
+    d=9 t=21: pp_tok=13186 new= 554 TTFT=  856.1ms TPOT= 18.6ms gen=150/150 dec_tps=53.8
+    d=9 t=22: pp_tok=13563 new= 227 TTFT=  223.4ms TPOT= 18.9ms gen=150/150 dec_tps=53.0
+    d=9 t=23: pp_tok=14326 new= 613 TTFT=  933.7ms TPOT= 19.1ms gen=150/150 dec_tps=52.4
+    d=9 t=24: pp_tok=14975 new= 499 TTFT=  817.6ms TPOT= 19.5ms gen=150/150 dec_tps=51.3
+    d=9 t=25: pp_tok=15483 new= 358 TTFT=  583.6ms TPOT= 20.0ms gen=150/150 dec_tps=50.1
+    d=9 t=26: pp_tok=15885 new= 252 TTFT=  328.2ms TPOT= 20.0ms gen=150/150 dec_tps=50.0
+    d=9 t=27: pp_tok=16375 new= 340 TTFT=  596.2ms TPOT= 20.3ms gen=150/150 dec_tps=49.3
+    d=9 t=28: pp_tok=17082 new= 557 TTFT= 1798.4ms TPOT= 20.9ms gen=150/150 dec_tps=47.8
+    d=9 t=29: pp_tok=17458 new= 226 TTFT=  320.4ms TPOT= 21.1ms gen=150/150 dec_tps=47.3
+
+  Done. Rows written to /benchmarks/sweep_results/llamacpp_agent_20260506_025851.csv
+  cache=off...
+    d=8 t=12: pp_tok= 8108 new= 251 TTFT= 4987.7ms TPOT= 15.5ms gen=150/150 dec_tps=64.5
+    d=8 t=13: pp_tok= 8601 new= 343 TTFT= 5523.6ms TPOT= 15.8ms gen=150/150 dec_tps=63.5
+    d=8 t=14: pp_tok= 9306 new= 555 TTFT= 6361.4ms TPOT= 16.3ms gen=150/150 dec_tps=61.5
+    d=8 t=15: pp_tok= 9682 new= 226 TTFT= 6772.2ms TPOT= 16.5ms gen=150/150 dec_tps=60.5
+    d=8 t=16: pp_tok=10443 new= 611 TTFT= 7704.3ms TPOT= 16.7ms gen=150/150 dec_tps=60.0
+    d=8 t=17: pp_tok=11088 new= 495 TTFT= 8568.6ms TPOT= 17.1ms gen=150/150 dec_tps=58.4
+    d=8 t=18: pp_tok=11594 new= 356 TTFT= 9270.3ms TPOT= 17.5ms gen=150/150 dec_tps=57.1
+    d=8 t=19: pp_tok=11996 new= 252 TTFT= 9830.7ms TPOT= 17.7ms gen=150/150 dec_tps=56.6
+    d=8 t=20: pp_tok=12487 new= 341 TTFT=10567.2ms TPOT= 17.9ms gen=150/150 dec_tps=55.8
+    d=8 t=21: pp_tok=13194 new= 557 TTFT=11683.9ms TPOT= 18.3ms gen=150/150 dec_tps=54.5
+    d=8 t=22: pp_tok=13569 new= 225 TTFT=12306.4ms TPOT= 18.6ms gen=150/150 dec_tps=53.7
+    d=8 t=23: pp_tok=14332 new= 613 TTFT=13605.3ms TPOT= 18.9ms gen=150/150 dec_tps=53.0
+    d=8 t=24: pp_tok=14984 new= 502 TTFT=14816.9ms TPOT= 19.3ms gen=150/150 dec_tps=51.9
+    d=8 t=25: pp_tok=15488 new= 354 TTFT=15810.7ms TPOT= 19.6ms gen=150/150 dec_tps=51.0
+    d=8 t=26: pp_tok=15890 new= 252 TTFT=16803.4ms TPOT= 19.8ms gen=150/150 dec_tps=50.4
+    d=8 t=27: pp_tok=16381 new= 341 TTFT=18042.6ms TPOT= 20.1ms gen=150/150 dec_tps=49.8
+    d=8 t=28: pp_tok=17085 new= 554 TTFT=19763.7ms TPOT= 20.6ms gen=150/150 dec_tps=48.6
+    d=8 t=29: pp_tok=17461 new= 226 TTFT=21357.0ms TPOT= 20.8ms gen=150/150 dec_tps=48.2
+    d=9 t=0: pp_tok= 1524 new=1524 TTFT=  325.2ms TPOT= 12.1ms gen=150/150 dec_tps=82.6
+    d=9 t=1: pp_tok= 1900 new= 226 TTFT=  482.6ms TPOT= 12.2ms gen=150/150 dec_tps=81.9
+    d=9 t=2: pp_tok= 2664 new= 614 TTFT=  916.0ms TPOT= 12.7ms gen=150/150 dec_tps=78.7
+    d=9 t=3: pp_tok= 3310 new= 496 TTFT= 1176.4ms TPOT= 13.0ms gen=150/150 dec_tps=76.9
+    d=9 t=4: pp_tok= 3812 new= 352 TTFT= 1468.5ms TPOT= 13.1ms gen=150/150 dec_tps=76.3
+    d=9 t=5: pp_tok= 4214 new= 252 TTFT= 1750.0ms TPOT= 13.3ms gen=150/150 dec_tps=75.3
+    d=9 t=6: pp_tok= 4704 new= 340 TTFT= 2095.6ms TPOT= 13.6ms gen=150/150 dec_tps=73.5
+    d=9 t=7: pp_tok= 5408 new= 554 TTFT= 2529.3ms TPOT= 14.1ms gen=150/150 dec_tps=71.1
+    d=9 t=8: pp_tok= 5785 new= 227 TTFT= 2861.9ms TPOT= 14.2ms gen=150/150 dec_tps=70.4
+    d=9 t=9: pp_tok= 6547 new= 612 TTFT= 3484.7ms TPOT= 14.5ms gen=150/150 dec_tps=68.8
+    d=9 t=10: pp_tok= 7193 new= 496 TTFT= 4201.6ms TPOT= 15.2ms gen=150/150 dec_tps=66.0
+    d=9 t=11: pp_tok= 7700 new= 357 TTFT= 4701.3ms TPOT= 15.4ms gen=150/150 dec_tps=65.1
+    d=9 t=12: pp_tok= 8101 new= 251 TTFT= 4981.8ms TPOT= 15.5ms gen=150/150 dec_tps=64.6
+    d=9 t=13: pp_tok= 8592 new= 341 TTFT= 5515.0ms TPOT= 15.8ms gen=150/150 dec_tps=63.5
+    d=9 t=14: pp_tok= 9296 new= 554 TTFT= 6361.2ms TPOT= 16.2ms gen=150/150 dec_tps=61.6
+    d=9 t=15: pp_tok= 9673 new= 227 TTFT= 6761.1ms TPOT= 16.5ms gen=150/150 dec_tps=60.6
+    d=9 t=16: pp_tok=10435 new= 612 TTFT= 7696.4ms TPOT= 16.7ms gen=150/150 dec_tps=60.0
+    d=9 t=17: pp_tok=11083 new= 498 TTFT= 8563.9ms TPOT= 17.2ms gen=150/150 dec_tps=58.2
+    d=9 t=18: pp_tok=11590 new= 357 TTFT= 9266.8ms TPOT= 17.7ms gen=150/150 dec_tps=56.4
+    d=9 t=19: pp_tok=11992 new= 252 TTFT= 9871.8ms TPOT= 17.8ms gen=150/150 dec_tps=56.2
+    d=9 t=20: pp_tok=12482 new= 340 TTFT=10564.0ms TPOT= 18.0ms gen=150/150 dec_tps=55.6
+    d=9 t=21: pp_tok=13186 new= 554 TTFT=11675.8ms TPOT= 18.3ms gen=150/150 dec_tps=54.5
+    d=9 t=22: pp_tok=13563 new= 227 TTFT=12255.6ms TPOT= 18.7ms gen=150/150 dec_tps=53.6
+    d=9 t=23: pp_tok=14326 new= 613 TTFT=13593.8ms TPOT= 18.9ms gen=150/150 dec_tps=52.9
+    d=9 t=24: pp_tok=14975 new= 499 TTFT=14788.9ms TPOT= 19.4ms gen=150/150 dec_tps=51.6
+    d=9 t=25: pp_tok=15483 new= 358 TTFT=15795.9ms TPOT= 19.6ms gen=150/150 dec_tps=51.0
+    d=9 t=26: pp_tok=15885 new= 252 TTFT=16811.4ms TPOT= 19.8ms gen=150/150 dec_tps=50.4
+    d=9 t=27: pp_tok=16375 new= 340 TTFT=17837.3ms TPOT= 20.1ms gen=150/150 dec_tps=49.8
+    d=9 t=28: pp_tok=17082 new= 557 TTFT=19712.1ms TPOT= 20.5ms gen=150/150 dec_tps=48.8
+    d=9 t=29: pp_tok=17458 new= 226 TTFT=21357.2ms TPOT= 20.8ms gen=150/150 dec_tps=48.0
+
+  Done. Rows written to /benchmarks/sweep_results/llamacpp_agent_20260506_025851.csv
+[Wed May  6 04:08:23 AM EDT 2026] llama.cpp agent sweep done; CSV: /nvme/ispass/jetson-containers/data/benchmarks/sweep_results/llamacpp_agent_20260506_025851.csv
+[Wed May  6 04:08:23 AM EDT 2026] rows: 601
+-rw-rw-r--+ 1 root root 99555 May  6 04:08 /nvme/ispass/jetson-containers/data/benchmarks/sweep_results/llamacpp_agent_20260506_025851.csv

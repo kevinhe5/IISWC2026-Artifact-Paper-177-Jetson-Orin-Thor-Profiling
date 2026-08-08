@@ -1,0 +1,195 @@
+{
+ "trtllm": {
+  "Q4": {
+   "label": "TRT-LLM int4",
+   "short_ctx": {
+    "matmul": 6.18,
+    "attention": 0.25,
+    "quantize": 0.0,
+    "copy_cast": 0.01,
+    "elementwise": 0.25,
+    "other": 0.31
+   },
+   "long_ctx": {
+    "matmul": 6.19,
+    "attention": 6.31,
+    "quantize": 0.0,
+    "copy_cast": 0.01,
+    "elementwise": 0.26,
+    "other": 0.32
+   }
+  },
+  "fp16": {
+   "label": "TRT-LLM fp16",
+   "short_ctx": {
+    "matmul": 14.23,
+    "attention": 0.25,
+    "quantize": 0.0,
+    "copy_cast": 0.0,
+    "elementwise": 0.27,
+    "other": 0.34
+   },
+   "long_ctx": {
+    "matmul": 14.29,
+    "attention": 6.33,
+    "quantize": 0.0,
+    "copy_cast": 0.01,
+    "elementwise": 0.29,
+    "other": 0.35
+   }
+  }
+ },
+ "llamacpp": {
+  "Q4": {
+   "label": "llama.cpp Q4_K_M",
+   "short_ctx": {
+    "matmul": 8.36,
+    "attention": 1.0,
+    "quantize": 0.2,
+    "copy_cast": 0.35,
+    "elementwise": 0.27,
+    "other": 0.15
+   },
+   "long_ctx": {
+    "matmul": 8.34,
+    "attention": 22.28,
+    "quantize": 0.2,
+    "copy_cast": 0.36,
+    "elementwise": 0.27,
+    "other": 0.15
+   }
+  },
+  "fp16": {
+   "label": "llama.cpp f16",
+   "short_ctx": {
+    "matmul": 17.96,
+    "attention": 1.06,
+    "quantize": 0.0,
+    "copy_cast": 0.34,
+    "elementwise": 0.28,
+    "other": 0.15
+   },
+   "long_ctx": {
+    "matmul": 18.46,
+    "attention": 23.07,
+    "quantize": 0.0,
+    "copy_cast": 0.36,
+    "elementwise": 0.28,
+    "other": 0.16
+   }
+  }
+ },
+ "vllm": {
+  "Q4": {
+   "label": "vLLM Q4 V0",
+   "short_ctx": {
+    "matmul": 9.64,
+    "attention": 0.27,
+    "quantize": 0.3,
+    "copy_cast": 0.17,
+    "elementwise": 0.16,
+    "other": 0.27
+   },
+   "long_ctx": {
+    "matmul": 9.62,
+    "attention": 6.55,
+    "quantize": 0.33,
+    "copy_cast": 0.17,
+    "elementwise": 0.16,
+    "other": 0.28
+   }
+  },
+  "fp16": {
+   "label": "vLLM fp16",
+   "short_ctx": {
+    "matmul": 14.68,
+    "attention": 0.19,
+    "quantize": 0.0,
+    "copy_cast": 0.02,
+    "elementwise": 0.21,
+    "other": 0.36
+   },
+   "long_ctx": {
+    "matmul": 14.7,
+    "attention": 6.51,
+    "quantize": 0.0,
+    "copy_cast": 0.02,
+    "elementwise": 0.22,
+    "other": 0.36
+   }
+  }
+ },
+ "sglang": {
+  "Q4": {
+   "label": "SGLang Q4 GGUF",
+   "short_ctx": {
+    "matmul": 9.81,
+    "attention": 0.22,
+    "quantize": 0.3,
+    "copy_cast": 0.15,
+    "elementwise": 0.46,
+    "other": 0.05
+   },
+   "long_ctx": {
+    "matmul": 9.61,
+    "attention": 7.5,
+    "quantize": 0.33,
+    "copy_cast": 0.15,
+    "elementwise": 0.51,
+    "other": 0.06
+   }
+  },
+  "fp16": {
+   "label": "SGLang fp16",
+   "short_ctx": {
+    "matmul": 15.46,
+    "attention": 0.22,
+    "quantize": 0.0,
+    "copy_cast": 0.17,
+    "elementwise": 0.4,
+    "other": 0.04
+   },
+   "long_ctx": {
+    "matmul": 14.94,
+    "attention": 7.44,
+    "quantize": 0.0,
+    "copy_cast": 0.17,
+    "elementwise": 0.45,
+    "other": 0.05
+   }
+  }
+ },
+ "pytorch": {
+  "Q4": {
+   "label": "PyTorch bnb-NF4",
+   "short_ctx": {
+    "matmul": 9.51,
+    "attention": 0.24,
+    "quantize": 0.0,
+    "copy_cast": 0.44,
+    "elementwise": 1.4,
+    "other": 0.0
+   },
+   "long_ctx": {
+    "matmul": 9.6,
+    "attention": 6.37,
+    "quantize": 0.0,
+    "copy_cast": 30.32,
+    "elementwise": 1.52,
+    "other": 0.0
+   }
+  },
+  "fp16": {
+   "label": "PyTorch bf16",
+   "short_ctx": {
+    "matmul": 15.15,
+    "attention": 0.24,
+    "quantize": 0.0,
+    "copy_cast": 0.44,
+    "elementwise": 1.54,
+    "other": 0.0
+   },
+   "long_ctx": null
+  }
+ }
+}

@@ -1,0 +1,10 @@
+axis,direction,vllm,trtllm,sglang,llamacpp,pytorch
+prefix_cache,higher,1,1,1,1,0
+python_taxonomy,higher,0.66,1.0,0.66,1.0,0.33
+programmability_pct,higher,94,18,76,60,100
+quantization_4bit_gb,lower,0.81,1.58,0.81,0.81,2.48
+reasoning_support_pct,higher,92,38,92,85,100
+energy_mj_per_tok,lower,772,656,863,851,1129
+e2e_latency_ms_per_tok,lower,19.3,16.3,23.2,21.2,39.8
+longctx_robustness_inv_slope,higher,6845,5331,9242,4035,1959
+contention_robustness,lower,1.00,1.05,1.06,1.18,1.95
