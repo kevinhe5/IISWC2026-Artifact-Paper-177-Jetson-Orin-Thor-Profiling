@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Generate fig_v5_figB_power_energy.{pdf,png}
-   - 2x2 panel:
-       (a) Prefill power stack by Jetson hardware rail + MAXN TDP line
-       (b) Prefill energy per prompt token (mJ / prompt-tok)
-       (c) Decode  power stack by Jetson hardware rail + MAXN TDP line
-       (d) Decode  energy per output token (mJ / output-tok)
+"""Generate fig07_power_energy.{pdf,png} — 2x2 panel:
+   (a) Prefill power stack by Jetson hardware rail + MAXN TDP line
+   (b) Prefill energy per prompt token (mJ / prompt-tok)
+   (c) Decode  power stack by Jetson hardware rail + MAXN TDP line
+   (d) Decode  energy per output token (mJ / output-tok)
 
-Power stacks use the three Jetson AGX Orin hardware power rails (matching
-gen_fig_v5_fig9_energy_rails.py):
+Formatting preserved from the paper's original generator
+(JetsonAnalysis/figs/scripts/gen_fig_v5_figB_power_energy.py).  Data
+intake replaced: reads per-(framework, quant) rows from
+data/chat/sweep_locked.csv filtered to Llama-3.2-1B, pp=4096, gen=4096,
+AGX Orin locked clocks.
+
+Power stacks use the three Jetson AGX Orin hardware power rails:
   * VDD_GPU_SOC : one physical rail powering GPU + iGPU + interconnect +
                   NVDLA + memory controllers. tegrastats reports the
                   modeled GPU and SOC components separately
@@ -16,22 +20,13 @@ gen_fig_v5_fig9_energy_rails.py):
   * VDD_CPU_CV  : A78AE CPU cluster.
   * VDDQ_1V8_AO : LPDDR5 DRAM cells (bandwidth-derived estimate).
 VIN_SYS_5V0 (system 5V / IO, <=5% of total on Orin) is not exposed by
-our tegrastats build and is therefore omitted from the stacks.
+tegrastats and is therefore omitted from the stacks.
 
-Model:  Llama-3.2-1B-Instruct
-Cond:   pp=4096, gen=4096, AGX Orin 32 GB, locked clocks
-        - sustained-workload cell where both prefill and decode reach
-          steady-state on the Tegra power rails. At short prefill
-          (pp<=256, TTFT<50 ms) tegrastats' 25 ms sampling undersamples
-          the GPU voltage/frequency ramp, biasing P_pref low by 10-40%;
-          pp=4096 (TTFT 200-1600 ms across fw) avoids that artifact.
-        - vLLM/SGLang use their `fp16_nocache` rows (no prefix caching)
-          so the prefill phase actually runs the matmul instead of
-          short-circuiting through the radix cache.
+Paper filename: fig_v5_figB_power_energy.pdf  (Orin-only, 1:1 candidate)
 
-Source CSV (kept for traceability):
-  data/sweep_results/sweep_locked_20260428_020532.csv
+  python3 gen_fig_v5_figB_power_energy.py [--out DIR]
 """
+import argparse, csv
 from pathlib import Path
 
 import matplotlib
@@ -39,133 +34,78 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-_HERE = Path(__file__).resolve().parent
-OUT_PDF = _HERE / "fig_v5_figB_power_energy.pdf"
-OUT_PNG = _HERE / "fig_v5_figB_power_energy.png"
+REPO = Path(__file__).resolve().parents[2]
+SRC  = REPO / "data" / "chat" / "sweep_locked.csv"
 
 TDP_W = 60.0   # AGX Orin 32 GB MAXN datasheet upper bound
+PP    = 4096   # prompt tokens (for prefill energy normalization)
+GEN   = 4096   # output tokens (for decode energy normalization)
 
-PP = 4096      # prompt tokens (for prefill energy normalization)
-GEN = 4096     # output tokens (for decode energy normalization)
-
-# De-hardcoded: DATA is loaded from artifact/data/chat/sweep_locked.csv
-# (Orin main-sweep CSV). One row per (framework, quantization) cell at
-# pp=4096, gen=4096. Falls back to embedded values only if the CSV path
-# cannot be found (for the paper's original submission-time values).
-#
-# Cells extracted (framework, quant_in_csv, display_label):
+# (fw_display_label, quant_display_label, csv_framework, csv_quantization)
+# Order/labels match the paper's original figure; csv_quantization picks
+# the row we want (e.g. vLLM uses its fp16_nocache row for apples-to-apples
+# prefill BW; PyTorch 4bit corresponds to bnb-NF4 in the paper).
 CELLS = [
-    ("trtllm",   "fp16",         "TRT-LLM",   "fp16"),
-    ("trtllm",   "int4",         "TRT-LLM",   "int4 (W4A16)"),
-    ("llamacpp", "f16",          "llama.cpp", "f16"),
-    ("llamacpp", "Q4_K_M",       "llama.cpp", "Q4_K_M"),
-    ("vllm",     "fp16_nocache", "vLLM",      "fp16"),  # no-cache variant
-    ("vllm",     "gguf_Q4_K_M",  "vLLM",      "gguf Q4_K_M"),
-    ("sglang",   "fp16_nocache", "SGLang",    "fp16"),  # no-cache variant
-    ("pytorch",  "bf16",         "PyTorch",   "bf16 (eager)"),
-    ("pytorch",  "4bit",         "PyTorch",   "bnb-NF4"),
+    ("TRT-LLM",   "fp16",         "trtllm",   "fp16"),
+    ("TRT-LLM",   "int4 (W4A16)", "trtllm",   "int4"),
+    ("llama.cpp", "f16",          "llamacpp", "f16"),
+    ("llama.cpp", "Q4_K_M",       "llamacpp", "Q4_K_M"),
+    ("vLLM",      "fp16",         "vllm",     "fp16_nocache"),
+    ("vLLM",      "gguf Q4_K_M",  "vllm",     "gguf_Q4_K_M"),
+    ("SGLang",    "fp16",         "sglang",   "fp16"),
+    ("PyTorch",   "bf16 (eager)", "pytorch",  "bf16"),
+    ("PyTorch",   "bnb-NF4",      "pytorch",  "4bit"),
 ]
 
-
-# Fallback for cells not present in the CSV (e.g. SGLang on Orin isn't in
-# sweep_locked.csv; it lives in sweep_locked_orin_15run.csv once rep15
-# finishes). These are the paper's original submission-time values.
-_HARDCODED_FALLBACK = {
-    ("SGLang", "fp16"):
-        (19400, 3444, 7665, 2784, 33293,   7531.34,
-         21353, 3318,11394, 5441, 41506,4006099.57),
-}
-
-
-def _load_data_from_csv(csv_path, pp=PP, gen=GEN):
-    """Read sweep_locked{,_orin_15run}.csv, extract the CELLS at (pp, gen),
-    assemble DATA tuples with the same schema as the pre-de-hardcode
-    version. For cells absent from the CSV (e.g. SGLang on Orin at
-    submission time), fall back to `_HARDCODED_FALLBACK` and print a
-    stderr note listing every fallback."""
-    import csv, sys
-    rows_by_key = {}
-    with open(csv_path, newline="") as f:
-        for r in csv.DictReader(f):
-            try:
-                r_pp = int(r["prompt_tokens"])
-                r_gen = int(r["gen_tokens"])
-            except (KeyError, ValueError):
-                continue
-            if r_pp != pp or r_gen != gen:
-                continue
-            key = (r["framework"], r["quantization"])
-            if key in rows_by_key:
-                continue  # first match wins
-            rows_by_key[key] = r
-
-    def _num(row, col, default=0.0):
-        v = row.get(col, "")
-        try:
-            return float(v)
-        except (TypeError, ValueError):
-            return default
-
-    out, missing = [], []
-    for fw_csv, quant_csv, fw_disp, quant_disp in CELLS:
-        r = rows_by_key.get((fw_csv, quant_csv))
-        if r is None:
-            fb = _HARDCODED_FALLBACK.get((fw_disp, quant_disp))
-            if fb is None:
-                raise KeyError(f"missing cell in {csv_path}: fw={fw_csv} "
-                               f"quant={quant_csv} pp={pp} gen={gen} "
-                               "and no hardcoded fallback")
-            missing.append((fw_disp, quant_disp))
-            out.append((fw_disp, quant_disp, *fb))
-        else:
-            out.append((
-                fw_disp, quant_disp,
-                _num(r, "pp_gpu_mw"),  _num(r, "pp_cpu_mw"),
-                _num(r, "pp_soc_mw"),  _num(r, "pp_dram_mw"),
-                _num(r, "pp_total_mw"),
-                _num(r, "prefill_energy_mj"),
-                _num(r, "dec_gpu_mw"), _num(r, "dec_cpu_mw"),
-                _num(r, "dec_soc_mw"), _num(r, "dec_dram_mw"),
-                _num(r, "dec_total_mw"),
-                _num(r, "decode_energy_mj"),
-            ))
-    if missing:
-        print(f"[gen_fig_v5_figB_power_energy] using hardcoded fallback for "
-              f"{len(missing)} cell(s) absent from {csv_path.name}: "
-              f"{missing}", file=sys.stderr)
-    return out
-
-
-# Locate the shipped Orin sweep CSV — prefer 15-run aggregate if present.
-_ART = _HERE.parent.parent   # scripts/plot/ → scripts/ → artifact/
-for _cand in (_ART / "data/chat/sweep_locked.csv",):
-    if _cand.is_file():
-        _CSV_PATH = _cand
-        break
-else:
-    raise FileNotFoundError(
-        f"sweep_locked{{,_orin_15run}}.csv not found under {_ART}/data/chat/. "
-        "This generator requires the Orin main-sweep CSV.")
-
-DATA = _load_data_from_csv(_CSV_PATH)
-
-# Rail palette (matches gen_fig_v5_fig9_energy_rails.py, derived from the
-# kernel-mix figure so the §IV figure suite shares one color language).
+# Rail palette (matches the kernel-mix figure so the §IV suite shares one
+# color language).
 RAIL_COLOR = {
-    "VDD_GPU_SOC": "#60a5fa",  # matmul blue  - merged GPU + SoC fabric
+    "VDD_GPU_SOC": "#60a5fa",  # matmul blue - merged GPU + SoC fabric
     "VDD_CPU_CV":  "#f59e0b",  # quantize amber - Python-tax signature
     "VDDQ_LPDDR5": "#94a3b8",  # copy_cast slate - DRAM
 }
 
-# Framework palette for the energy bars (matches the Pareto figure).
+# Framework palette for the energy bars — pale/pastel per paper original
+# (color-picked from figs_original/fig_v5_figB_power_energy.pdf).
 FW_COLOR_BAR = {
-    "TRT-LLM":         "#60a5fa",
-    "llama.cpp":       "#f59e0b",
-    "vLLM":            "#a78bfa",
-    "SGLang":          "#94a3b8",
-    "PyTorch":         "#ef4444",
-    "PyTorch+compile": "#16a34a",
+    "TRT-LLM":         "#AFC5B4",   # pale sage
+    "llama.cpp":       "#E8B4B8",   # dusty rose
+    "vLLM":            "#F7CB9F",   # pale apricot
+    "SGLang":          "#C9BEDC",   # pale lavender
+    "PyTorch":         "#D0B0A0",   # pale tan / beige
+    "PyTorch+compile": "#B9C8AE",   # pale olive (near sage) — kept for continuity
 }
+
+
+def load_cells():
+    """Return list of tuples matching the original DATA schema, sourced
+    from data/chat/sweep_locked.csv."""
+    # Build a lookup: (framework, quantization) -> row dict
+    rows = {}
+    for r in csv.DictReader(open(SRC)):
+        if r["model"] != "Llama-3.2-1B": continue
+        if int(r["prompt_tokens"]) != PP: continue
+        if int(r["gen_tokens"]) != GEN: continue
+        rows[(r["framework"], r["quantization"])] = r
+
+    data = []
+    for fw_lbl, q_lbl, csv_fw, csv_q in CELLS:
+        r = rows.get((csv_fw, csv_q))
+        if r is None:
+            print(f"# WARN: missing sweep row for ({csv_fw}, {csv_q}); dropping")
+            continue
+        data.append((
+            fw_lbl, q_lbl,
+            float(r["pp_gpu_mw"]),  float(r["pp_cpu_mw"]),
+            float(r["pp_soc_mw"]),  float(r["pp_dram_mw"]),
+            float(r["pp_total_mw"]),
+            float(r["prefill_energy_mj"]),
+            float(r["dec_gpu_mw"]), float(r["dec_cpu_mw"]),
+            float(r["dec_soc_mw"]), float(r["dec_dram_mw"]),
+            float(r["dec_total_mw"]),
+            float(r["decode_energy_mj"]),
+        ))
+    return data
 
 
 def draw_power_stack(ax, x, gpu_soc, cpu, dram,
@@ -182,11 +122,8 @@ def draw_power_stack(ax, x, gpu_soc, cpu, dram,
            color=RAIL_COLOR["VDDQ_LPDDR5"], edgecolor="#0f1115", lw=0.6,
            zorder=3, label="DRAM")
 
+    # Paper original has no "N.N W" stack-top labels — dropped for parity.
     stack_top = gpu_soc + cpu + dram
-    for xi, st in zip(x, stack_top):
-        ax.text(xi, st + 1.2, f"{st:.1f} W",
-                ha="center", va="bottom", fontsize=10,
-                color="#1f2937", fontweight="bold")
 
     ax.axhline(TDP_W, color="#dc2626", lw=1.4, ls="--", zorder=5,
                label=f"MAXN TDP ({TDP_W:.0f} W)")
@@ -200,10 +137,7 @@ def draw_power_stack(ax, x, gpu_soc, cpu, dram,
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
     ax.tick_params(axis="y", labelsize=11)
-    if show_legend:
-        ax.legend(loc="upper right", fontsize=11, frameon=True,
-                  framealpha=0.95, handlelength=1.4, handleheight=1.1,
-                  labelspacing=0.4, ncol=1)
+    # Legend is drawn once at the figure level (horizontal band between rows).
 
 
 def draw_energy_bar(ax, x, vals, fw_per_cell, title, ylabel):
@@ -227,8 +161,17 @@ def draw_energy_bar(ax, x, vals, fw_per_cell, title, ylabel):
 
 
 def main():
-    fig, axes = plt.subplots(2, 2, figsize=(14.0, 9.2),
-                             gridspec_kw={"hspace": 0.46, "wspace": 0.18})
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=".", help="output directory")
+    args = ap.parse_args()
+    out_dir = Path(args.out); out_dir.mkdir(parents=True, exist_ok=True)
+
+    DATA = load_cells()
+    if not DATA:
+        raise SystemExit("no rows found in sweep_locked.csv for the requested cells")
+
+    fig, axes = plt.subplots(2, 2, figsize=(14.0, 8.6),
+                             gridspec_kw={"hspace": 0.62, "wspace": 0.18})
     (axTL, axTR), (axBL, axBR) = axes
 
     x = np.arange(len(DATA))
@@ -237,14 +180,14 @@ def main():
 
     # Prefill rail powers (W) - merge GPU + SOC into the VDD_GPU_SOC rail.
     pp_gpu_soc = np.array([d[2] + d[4] for d in DATA]) / 1000.0
-    pp_cpu = np.array([d[3] for d in DATA]) / 1000.0
-    pp_dram = np.array([d[5] for d in DATA]) / 1000.0
+    pp_cpu     = np.array([d[3]        for d in DATA]) / 1000.0
+    pp_dram    = np.array([d[5]        for d in DATA]) / 1000.0
     pp_e_per_tok = np.array([d[7] / PP for d in DATA])
 
     # Decode rail powers (W) - same merge.
-    dc_gpu_soc = np.array([d[8] + d[10] for d in DATA]) / 1000.0
-    dc_cpu = np.array([d[9] for d in DATA]) / 1000.0
-    dc_dram = np.array([d[11] for d in DATA]) / 1000.0
+    dc_gpu_soc = np.array([d[8]  + d[10] for d in DATA]) / 1000.0
+    dc_cpu     = np.array([d[9]          for d in DATA]) / 1000.0
+    dc_dram    = np.array([d[11]         for d in DATA]) / 1000.0
     dc_e_per_tok = np.array([d[13] / GEN for d in DATA])
 
     pwr_top = max(TDP_W * 1.10,
@@ -253,7 +196,7 @@ def main():
 
     draw_power_stack(axTL, x, pp_gpu_soc, pp_cpu, pp_dram,
                      "(a) Prefill rail power",
-                     show_legend=True, ylim_top=pwr_top)
+                     show_legend=False, ylim_top=pwr_top)
     draw_energy_bar(axTR, x, pp_e_per_tok, fws,
                     "(b) Prefill energy / prompt token",
                     "mJ / prompt token")
@@ -263,6 +206,25 @@ def main():
     draw_energy_bar(axBR, x, dc_e_per_tok, fws,
                     "(d) Decode energy / output token",
                     "mJ / output token")
+
+    # Single horizontal legend band centered between the two rows,
+    # matching the paper original.
+    from matplotlib.patches import Patch
+    from matplotlib.lines  import Line2D
+    legend_handles = [
+        Patch(facecolor=RAIL_COLOR["VDD_GPU_SOC"], edgecolor="#0f1115",
+              lw=0.6, label="GPU + SoC"),
+        Patch(facecolor=RAIL_COLOR["VDD_CPU_CV"], edgecolor="#0f1115",
+              lw=0.6, label="CPU"),
+        Patch(facecolor=RAIL_COLOR["VDDQ_LPDDR5"], edgecolor="#0f1115",
+              lw=0.6, label="DRAM"),
+        Line2D([0], [0], color="#dc2626", lw=1.6, ls="--",
+               label=f"MAXN TDP ({TDP_W:.0f} W)"),
+    ]
+    fig.legend(handles=legend_handles, loc="center",
+               bbox_to_anchor=(0.5, 0.505), ncol=4, frameon=False,
+               fontsize=13, handlelength=1.8, handleheight=1.1,
+               columnspacing=2.2, labelspacing=0.4)
 
     # x-tick labels on bottom row only (top row hidden)
     for ax in (axTL, axTR):
@@ -275,10 +237,12 @@ def main():
         ax.set_xticklabels(flat_labels, fontsize=11, rotation=28, ha="right")
 
     fig.tight_layout()
-    fig.savefig(OUT_PDF, bbox_inches="tight", pad_inches=0.14)
-    fig.savefig(OUT_PNG, bbox_inches="tight", pad_inches=0.14, dpi=200)
-    print(f"wrote {OUT_PDF}")
-    print(f"wrote {OUT_PNG}")
+    pdf = out_dir / "fig07_power_energy.pdf"
+    png = out_dir / "fig07_power_energy.png"
+    fig.savefig(pdf, bbox_inches="tight", pad_inches=0.14)
+    fig.savefig(png, bbox_inches="tight", pad_inches=0.14, dpi=200)
+    print(f"wrote {pdf}")
+    print(f"wrote {png}")
 
 
 if __name__ == "__main__":

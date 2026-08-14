@@ -1,32 +1,23 @@
 #!/usr/bin/env python3
-"""Generate fig_v5_agentic_trace_stats.{pdf,png} — Figure (new).
+"""Fig 12 — SWE-bench-live agentic trace stats: Dense (Llama-3.2-1B) vs
+reasoning (Qwen3-4B), 4 frameworks per regime (TRT-LLM excluded — no
+reasoning counterpart on sm_87). 2×3 grid.
 
-Mirror of Sutradhara (arXiv 2601.12967) Figure 3, but on the edge AGX
-Orin instead of an H200 datacenter trace, using Plan A SWE-bench-live
-measurements (N=30 SWE-smith bug instances spanning 21 base repos,
-12c-unpinned baseline, max_turns=30, multi-tool + thought-prompting
-harness — dispatched 2026-05-15).
+Formatting preserved from the paper's original generator
+(JetsonAnalysis/figs/scripts/gen_fig_act2_cdf_combined_from_csv.py.bak):
+same panel layout, same CDF step style, same median markers + summary
+box, same 8-row action-mix bar with framework-tinted y-ticks, same
+top-level fw/regime legend.
 
-Panels:
-  (a) Iteration Depth CDF      — turns per task per framework (bimodal:
-                                  early-done vs MAX_TURNS=30 cap)
-  (b) Tool Fan-Out CDF         — tool calls per iteration (multi-tool
-                                  harness — most turns still emit 1
-                                  action; ~0.3% emit >1)
-  (c) Prompt Length CDF        — intermediate vs final turn
-  (d) Response Length CDF      — gen_tokens per turn, intermediate vs final
-  (e) Tool Time Ratio CDF      — tool_exec_ms / (prefill+decode+tool_exec)
-  (f) Tool Latency Variation   — box plots, normalised to per-tool median
+Data intake replaced: reads per-turn traces from
+    data/agentic/llama_1B/{fw}.csv           (dense: Llama-3.2-1B)
+    data/agentic/qwen3_4B/{fw}_thinkON.csv   (reason: Qwen3-4B, think-ON)
+The Qwen3 llamacpp file may be either `_thinkON` or plain, so we try
+both. Paper filename: fig_act2_cdf_combined.pdf.
 
-Provenance: sweep_results/<fw>_swebench_live_12c_*.csv (Plan A
-unpinned-12c baseline, locked clocks, MAXN, 5 frameworks).
-(slim_cpp — an exploratory llama.cpp fork — was dropped from the final paper.)
+  python3 gen_fig12_swebench.py [--out DIR]
 """
-import csv
-import glob
-import json
-import os
-import sys
+import argparse, csv, json, sys
 from collections import defaultdict
 from pathlib import Path
 from statistics import median
@@ -36,53 +27,68 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-import argparse
-_AP = argparse.ArgumentParser()
-_AP.add_argument("--out", default=".")
-_ARGS, _ = _AP.parse_known_args()
 REPO = Path(__file__).resolve().parents[2]
-# De-hardcoded: read the shipped agentic SWE-bench-live CSVs (dense Llama-3.2-1B, Orin-backed).
-SWEEP = REPO / "data" / "agentic" / "llama_1B"
-_OUT = Path(_ARGS.out) / "fig12_swebench"
-OUT_PDF = str(_OUT.with_suffix(".pdf"))
-OUT_PNG = str(_OUT.with_suffix(".png"))
+DATA = REPO / "data" / "agentic"
 
-CSVS = {
-    "llamacpp":  "llamacpp.csv",
-    "vllm":      "vllm.csv",
-    "sglang":    "sglang.csv",
-    "pytorch":   "pytorch.csv",
-    "trtllm":    "trtllm.csv",
+FW_LIST   = ["vllm", "sglang", "llamacpp", "pytorch"]
+REGIMES   = ["dense", "reason"]
+FW_COLORS = {"vllm": "#f97316", "sglang": "#a78bfa",
+             "llamacpp": "#f472b6", "pytorch": "#34d399"}
+STYLE = {"dense": (0, (4, 2.5)), "reason": "-"}
+
+ACTION_ORDER = ["respond", "list_dir", "view_file", "grep", "edit_file",
+                "bash", "pytest", "run_python", "done"]
+ACTION_COLOR = {
+    "respond":        "#d4d4d8",
+    "list_dir":       "#fde68a",
+    "view_file":      "#BDD4E5",
+    "grep":           "#fbcfe8",
+    "edit_file":      "#1f4f9c",
+    "bash":           "#3a8b3a",
+    "pytest":         "#dc2626",
+    "run_python":     "#9333ea",
+    "done":           "#f59e0b",
+    "parser_garbage": "#7f1d1d",
+    "other":          "#a3a3a3",
 }
-FW_COLORS = {
-    "llamacpp": "#f472b6",
-    "vllm":     "#f97316", "sglang":   "#a78bfa",
-    "pytorch":  "#34d399", "trtllm":   "#60a5fa",
-}
+KNOWN = set(ACTION_ORDER)
 
 
-def load_one(pattern):
-    """Return list of (task_id, turn_idx, phase, phase_ms, extra) rows."""
+def csv_for(fw, regime):
+    if regime == "dense":
+        return DATA / "llama_1B" / f"{fw}.csv"
+    # reason: prefer explicit _thinkON, fall back to plain filename
+    for name in (f"{fw}_thinkON.csv", f"{fw}.csv"):
+        p = DATA / "qwen3_4B" / name
+        if p.exists():
+            return p
+    return DATA / "qwen3_4B" / f"{fw}_thinkON.csv"   # will fail loudly
+
+
+def load_one(fw, regime):
+    p = csv_for(fw, regime)
     rows = []
-    for path in sorted(glob.glob(str(SWEEP / pattern))):
-        try:
-            with open(path) as f:
-                for r in csv.DictReader(f):
-                    try:
-                        phase_ms = float(r.get("phase_ms") or 0)
-                        ex = json.loads(r["extra"]) if r.get("extra") else {}
-                    except Exception:
-                        continue
-                    rows.append({
-                        "task_id":  int(r.get("task_id") or 0),
-                        "turn_idx": int(r.get("turn_idx") or 0),
-                        "phase":    r.get("phase", ""),
-                        "phase_ms": phase_ms,
-                        "extra":    ex,
-                    })
-        except Exception:
-            pass
-    return rows
+    if not p.exists():
+        return rows, p.name
+    with open(p, newline="") as fh:
+        for r in csv.DictReader(fh):
+            try:
+                ms = float(r.get("phase_ms") or 0)
+                ex = json.loads(r["extra"]) if r.get("extra") else {}
+            except Exception:
+                continue
+            try:
+                turn = int(r.get("turn_idx") or 0)
+            except ValueError:
+                continue
+            rows.append({
+                "task_id":  r.get("task_id", ""),
+                "turn_idx": turn,
+                "phase":    r.get("phase", ""),
+                "phase_ms": ms,
+                "extra":    ex if isinstance(ex, dict) else {},
+            })
+    return rows, p.name
 
 
 def cdf(values):
@@ -93,230 +99,204 @@ def cdf(values):
     return xs, ys
 
 
-def main() -> int:
-    fw_rows = {fw: load_one(pat) for fw, pat in CSVS.items()}
-    # Quick sanity
-    for fw, rows in fw_rows.items():
-        print(f"  {fw}: {len(rows)} phase-rows")
+def plot_cdf_panel(ax, data, title, xlabel, *, log_x=True, fmt="{:.0f}"):
+    medians = {}
+    for (fw, regime), vals in data.items():
+        if not vals:
+            continue
+        xs, ys = cdf(vals)
+        ax.step(xs, ys, where="post",
+                color=FW_COLORS[fw],
+                linestyle=STYLE[regime],
+                linewidth=1.7 if regime == "reason" else 1.4,
+                alpha=0.95, zorder=3)
+        medians[(fw, regime)] = median(vals)
 
-    fig, axes = plt.subplots(2, 3, figsize=(14.5, 8.4))
-    (axA, axB, axE), (axC, axD, axF) = axes
+    ax.axhline(0.5, color="#9ca3af", linewidth=0.6, linestyle=":",
+               alpha=0.7, zorder=2)
 
-    # ----- (a) Iteration depth: turns per (fw, task) -----
-    # The bench emits a terminal-action row at turn_idx = MAX_TURNS - 1 even
-    # for tasks that ended early via `done`, so max(turn_idx)+1 always equals
-    # MAX_TURNS. The honest depth is the COUNT of unique turn_idx values.
-    depths_per_fw = defaultdict(list)
-    for fw, rows in fw_rows.items():
+    for (fw, regime), m in medians.items():
+        ax.scatter(m, 0.5, s=90, color=FW_COLORS[fw],
+                   edgecolor="#0f1115", linewidth=0.8,
+                   marker="o",
+                   facecolor=FW_COLORS[fw] if regime == "reason" else "white",
+                   zorder=5)
+
+    lines = []
+    for fw in FW_LIST:
+        d = medians.get((fw, "dense"))
+        r = medians.get((fw, "reason"))
+        if d is None or r is None:
+            continue
+        ratio = (r / d) if d else 0
+        lines.append((fw, d, r, ratio))
+
+    if lines:
+        text_lines = ["med (NR → R)"]
+        for fw, d, r, ratio in lines:
+            text_lines.append(
+                f"{fw:8s} {fmt.format(d):>7s} → {fmt.format(r):>7s}  "
+                f"({ratio:.1f}×)"
+            )
+        ax.text(0.02, 0.98, "\n".join(text_lines),
+                transform=ax.transAxes, ha="left", va="top",
+                fontsize=7.2, fontfamily="monospace",
+                color="#1f2937",
+                bbox=dict(boxstyle="round,pad=0.3", fc="white",
+                          ec="#d1d5db", lw=0.6, alpha=0.92),
+                zorder=6)
+
+    ax.set_xlabel(xlabel, fontsize=10)
+    ax.set_ylabel("CDF", fontsize=10)
+    ax.set_title(title, fontsize=10)
+    if log_x:
+        ax.set_xscale("log")
+    ax.grid(True, alpha=0.3, which="both")
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+
+
+def _bucket(a):
+    if not a or not isinstance(a, str):
+        return "other"
+    for known in ACTION_ORDER:
+        if a != known and a.startswith(known) and len(a) > len(known):
+            return "parser_garbage"
+    return a if a in KNOWN else "other"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=".")
+    args = ap.parse_args()
+    out_dir = Path(args.out); out_dir.mkdir(parents=True, exist_ok=True)
+
+    rows_by = {}
+    for fw in FW_LIST:
+        for regime in REGIMES:
+            rs, fn = load_one(fw, regime)
+            rows_by[(fw, regime)] = rs
+            print(f"  {fw:9s} {regime:6s} {len(rs):5d} rows  <- {fn}")
+
+    # Paper layout: 1x3 — (a) iteration depth | (b) response length | (c) action mix
+    fig, (axA, axC, axF) = plt.subplots(
+        1, 3, figsize=(19.5, 4.9),
+        gridspec_kw=dict(width_ratios=[1.0, 1.0, 1.55], wspace=0.24))
+
+    # (a) Iteration depth
+    depth = {}
+    for (fw, regime), rows in rows_by.items():
         by_task = defaultdict(set)
         for r in rows:
             by_task[r["task_id"]].add(r["turn_idx"])
-        for t, turns in by_task.items():
-            depths_per_fw[fw].append(len(turns))
+        depth[(fw, regime)] = [len(ts) for ts in by_task.values()]
+    plot_cdf_panel(axA, depth,
+                   title="(a) Iteration depth", xlabel="turns per task",
+                   log_x=False, fmt="{:.0f}")
 
-    for fw, depths in depths_per_fw.items():
-        xs, ys = cdf(depths)
-        if xs:
-            axA.step(xs, ys, where="post", color=FW_COLORS[fw], lw=1.6,
-                     label=f"{fw} (n={len(depths)})")
-    axA.set_xlabel("turns per task", fontsize=10)
-    axA.set_ylabel("CDF", fontsize=10)
-    all_depths = [d for ds in depths_per_fw.values() for d in ds]
-    axA.set_title(f"(a) Iteration depth  ·  median {median(all_depths):.0f} turns, max_turns=30",
+    # (b) Response length per turn
+    gen = {}
+    for (fw, regime), rows in rows_by.items():
+        gen[(fw, regime)] = [
+            r["extra"].get("gen_tokens", 0) for r in rows
+            if r["phase"] == "decode" and (r["extra"].get("gen_tokens") or 0) > 0
+        ]
+    plot_cdf_panel(axC, gen,
+                   title="(b) Response length per turn",
+                   xlabel="gen tokens (log)", log_x=True)
+
+    # (c) Action mix — 8-row paired horizontal bars; non-reasoning rows hatched
+    row_keys = []
+    for fw in FW_LIST:
+        row_keys.append((fw, "reason"))
+        row_keys.append((fw, "dense"))
+
+    stack_order = ACTION_ORDER + ["parser_garbage", "other"]
+    y_pos = np.arange(len(row_keys))[::-1]
+
+    for i, key in enumerate(row_keys):
+        fw, regime = key
+        cnt = defaultdict(int)
+        for r in rows_by[key]:
+            if r["phase"] != "parse_action": continue
+            cnt[_bucket(r["extra"].get("action"))] += 1
+        tot = sum(cnt.values()) or 1
+        pct = {k: 100 * v / tot for k, v in cnt.items()}
+        left = 0
+        for stk in stack_order:
+            v = pct.get(stk, 0.0)
+            if v <= 0: continue
+            axF.barh(y_pos[i], v, height=0.78,
+                     left=left, color=ACTION_COLOR[stk],
+                     edgecolor="#0f1115", linewidth=0.4, zorder=3,
+                     hatch="///" if regime == "dense" else None)
+            if v >= 7.0:
+                axF.text(left + v / 2, y_pos[i], f"{v:.0f}",
+                         ha="center", va="center", fontsize=7.0,
+                         color=("white" if stk in (
+                             "edit_file", "bash", "pytest", "run_python",
+                             "parser_garbage") else "#1f2937"),
+                         fontweight="bold", zorder=4)
+            left += v
+
+    ylabels = [f"{fw}  ·  {'reason' if regime == 'reason' else 'non-reason'}"
+               for fw, regime in row_keys]
+    axF.set_yticks(y_pos)
+    axF.set_yticklabels(ylabels, fontsize=8.5)
+    for tick_label, (fw, _) in zip(axF.get_yticklabels(), row_keys):
+        tick_label.set_color(FW_COLORS[fw])
+        tick_label.set_fontweight("bold")
+    axF.tick_params(axis="y", length=0)
+    axF.set_xlim(0, 100)
+    axF.set_xticks([0, 25, 50, 75, 100])
+    axF.set_xticklabels(["0", "25", "50", "75", "100 %"], fontsize=8.5)
+    axF.set_xlabel("share of actions emitted by the model", fontsize=10)
+    axF.set_title("(c) Action mix: non-reasoning vs reasoning per framework",
                   fontsize=10)
-    axA.grid(True, alpha=0.3)
-    axA.legend(fontsize=8, loc="lower right", framealpha=0.85)
+    axF.grid(True, axis="x", color="#e5e7eb", linewidth=0.4, alpha=0.7, zorder=1)
+    for s in ("top", "right"):
+        axF.spines[s].set_visible(False)
+    for j in range(1, len(FW_LIST)):
+        sep_y = y_pos[2 * j] + 0.5
+        axF.axhline(sep_y, color="#d4d4d8", linewidth=0.4, linestyle=":",
+                    alpha=0.7, zorder=1)
 
-    # ----- (b) Tool fan-out: tool calls per iteration -----
-    # Our bench: single-action ReAct → fan-out = 1 per turn (always one tool_exec phase per turn).
-    # We plot the contrast against Sutradhara's multi-tool patterns.
-    fanouts = []
-    for fw, rows in fw_rows.items():
-        per_turn = defaultdict(int)
-        for r in rows:
-            if r["phase"] == "tool_exec":
-                per_turn[(fw, r["task_id"], r["turn_idx"])] += 1
-        fanouts.extend(per_turn.values())
-    xs, ys = cdf(fanouts)
-    axB.step(xs, ys, where="post", color="#f97316", lw=2.0,
-             label=f"Edge SWE-bench (n={len(fanouts)})")
-    axB.set_xlabel("tool calls per iteration", fontsize=10)
-    axB.set_ylabel("CDF", fontsize=10)
-    axB.set_title("(b) Tool fan-out  ·  ~100% emit 1 call (multi-tool harness, 1B model)",
-                  fontsize=10)
-    axB.set_xlim(0, 5)
-    axB.grid(True, alpha=0.3)
-    axB.legend(fontsize=8, loc="center right", framealpha=0.85)
+    # Action legend (below panel c)
+    from matplotlib.patches import Patch
+    used = set()
+    for key in row_keys:
+        for r in rows_by[key]:
+            if r["phase"] == "parse_action":
+                used.add(_bucket(r["extra"].get("action")))
+    legend_keys = [k for k in stack_order if k in used]
+    handles_act = [Patch(facecolor=ACTION_COLOR[k], edgecolor="#0f1115",
+                         linewidth=0.4, label=k) for k in legend_keys]
+    axF.legend(handles=handles_act, loc="upper center",
+               bbox_to_anchor=(0.5, -0.20),
+               ncol=min(len(handles_act), 5), frameon=False, fontsize=7.5)
 
-    # ----- (c) Prompt length CDF: intermediate vs final turn -----
-    intermediate, final = [], []
-    for fw, rows in fw_rows.items():
-        by_task = defaultdict(list)
-        for r in rows:
-            if r["phase"] == "prefill":
-                pt = r["extra"].get("prompt_tokens", 0)
-                if pt > 0:
-                    by_task[r["task_id"]].append((r["turn_idx"], pt))
-        for task, turns in by_task.items():
-            turns.sort()
-            for i, (ti, pt) in enumerate(turns):
-                if i == len(turns) - 1:
-                    final.append(pt)
-                else:
-                    intermediate.append(pt)
-    xs, ys = cdf(intermediate)
-    axC.step(xs, ys, where="post", color="#3b82f6", lw=1.8, ls="--",
-             label=f"Intermediate (n={len(intermediate)})")
-    xs, ys = cdf(final)
-    axC.step(xs, ys, where="post", color="#ef4444", lw=1.8,
-             label=f"Final (n={len(final)})")
-    axC.set_xlabel("prompt length (tokens)", fontsize=10)
-    axC.set_ylabel("CDF", fontsize=10)
-    pp_med = median(intermediate) if intermediate else 0
-    axC.set_title(f"(c) Prompt length  ·  intermediate-turn median {pp_med:.0f} tok",
-                  fontsize=10)
-    axC.grid(True, alpha=0.3)
-    axC.legend(fontsize=8, loc="lower right", framealpha=0.85)
+    # Top-level fw + regime legend
+    from matplotlib.lines import Line2D
+    fw_handles = [Line2D([0], [0], color=FW_COLORS[fw], lw=2.4, label=fw)
+                  for fw in FW_LIST]
+    regime_handles = [
+        Line2D([0], [0], color="#1f2937", lw=1.8, linestyle="-",
+               label="reasoning  (Qwen3-4B, solid)"),
+        Line2D([0], [0], color="#1f2937", lw=1.5, linestyle=(0, (4, 2.5)),
+               label="non-reasoning  (Llama-3.2-1B, dashed)"),
+    ]
+    fig.legend(handles=fw_handles + regime_handles, loc="upper center",
+               bbox_to_anchor=(0.5, 1.06),
+               ncol=6, frameon=False, fontsize=11)
 
-    # ----- (d) Response length CDF -----
-    intermediate, final = [], []
-    for fw, rows in fw_rows.items():
-        by_task = defaultdict(list)
-        for r in rows:
-            if r["phase"] == "decode":
-                gt = r["extra"].get("gen_tokens", 0)
-                if gt > 0:
-                    by_task[r["task_id"]].append((r["turn_idx"], gt))
-        for task, turns in by_task.items():
-            turns.sort()
-            for i, (ti, gt) in enumerate(turns):
-                if i == len(turns) - 1:
-                    final.append(gt)
-                else:
-                    intermediate.append(gt)
-    xs, ys = cdf(intermediate)
-    axD.step(xs, ys, where="post", color="#3b82f6", lw=1.8, ls="--",
-             label=f"Intermediate (n={len(intermediate)})")
-    xs, ys = cdf(final)
-    axD.step(xs, ys, where="post", color="#ef4444", lw=1.8,
-             label=f"Final (n={len(final)})")
-    axD.set_xlabel("response length (gen tokens)", fontsize=10)
-    axD.set_ylabel("CDF", fontsize=10)
-    gen_med = median(intermediate) if intermediate else 0
-    axD.set_title(f"(d) Response length  ·  intermediate-turn median {gen_med:.0f} tok",
-                  fontsize=10)
-    axD.grid(True, alpha=0.3)
-    axD.legend(fontsize=8, loc="lower right", framealpha=0.85)
-
-    # ----- (e) Tool Time Ratio CDF — tool_exec / (prefill+decode+tool_exec) per task -----
-    ratios_per_fw = defaultdict(list)
-    for fw, rows in fw_rows.items():
-        by_task = defaultdict(lambda: {"prefill": 0.0, "decode": 0.0, "tool_exec": 0.0})
-        for r in rows:
-            if r["phase"] in by_task[0]:
-                pass  # noop
-            by_task[r["task_id"]].setdefault(r["phase"], 0.0)
-            if r["phase"] in ("prefill", "decode", "tool_exec"):
-                by_task[r["task_id"]][r["phase"]] = by_task[r["task_id"]].get(r["phase"], 0.0) + r["phase_ms"]
-        for t, sums in by_task.items():
-            tot = sums.get("prefill", 0) + sums.get("decode", 0) + sums.get("tool_exec", 0)
-            if tot > 0:
-                ratios_per_fw[fw].append(sums.get("tool_exec", 0) / tot)
-    for fw, rs in ratios_per_fw.items():
-        xs, ys = cdf(rs)
-        if xs:
-            axE.step(xs, ys, where="post", color=FW_COLORS[fw], lw=1.6,
-                     label=f"{fw} (med {median(rs)*100:.1f}%)")
-    axE.set_xlabel("tool / (LLM + tool) per task", fontsize=10)
-    axE.set_ylabel("CDF", fontsize=10)
-    # Compute fw with the per-task max ratio across all tasks (for the title)
-    max_fw, max_r = None, 0.0
-    for fw, rs in ratios_per_fw.items():
-        if rs and max(rs) > max_r:
-            max_fw, max_r = fw, max(rs)
-    axE.set_title(f"(e) Tool time share  ·  per-task max {max_r*100:.0f}% on {max_fw}",
-                  fontsize=10)
-    axE.set_xlim(0, 1.0)
-    axE.grid(True, alpha=0.3)
-    axE.legend(fontsize=7.5, loc="lower right", framealpha=0.85)
-
-    # ----- (f) Tool latency — horizontal boxplot, absolute ms (log x), per tool -----
-    # Exclude the terminal "respond" / "done" actions: synthesized by the
-    # bench harness (final-message + termination), no real tool subprocess work.
-    EXCLUDE_TOOLS = {"respond", "done"}
-    times_per_tool = defaultdict(list)
-    for fw, rows in fw_rows.items():
-        for r in rows:
-            if r["phase"] == "tool_exec":
-                tool = r["extra"].get("action") or "?"
-                if tool in EXCLUDE_TOOLS:
-                    continue
-                if r["phase_ms"] > 0:
-                    times_per_tool[tool].append(r["phase_ms"])
-    # Sort tools by median latency ASCENDING — lightest at top (after invert).
-    # Require ≥20 samples so single-call tools (view_file) don't show as a dot.
-    tools_sorted = [(t, ts) for t, ts in times_per_tool.items() if len(ts) >= 20]
-    tools_sorted.sort(key=lambda kv: median(kv[1]))
-
-    positions = list(range(len(tools_sorted)))
-    box_data = [ts for _, ts in tools_sorted]
-    yticklabels = [f"{t} (n={len(ts)})" for t, ts in tools_sorted]
-
-    # Light colour for short tools, red for heavy — use a Reds gradient on log(median)
-    import matplotlib.colors as mcolors
-    meds = [median(ts) for _, ts in tools_sorted]
-    norm = mcolors.LogNorm(vmin=max(min(meds), 1e-3), vmax=max(meds))
-    cmap = plt.get_cmap("YlOrRd")
-    box_colors = [cmap(0.30 + 0.55 * norm(m)) for m in meds]
-
-    bp = axF.boxplot(
-        box_data, positions=positions, vert=False, widths=0.65,
-        patch_artist=True, showfliers=False, whis=(5, 95),
-        boxprops=dict(linewidth=0.8),
-        whiskerprops=dict(color="#52525b", linewidth=0.9),
-        capprops=dict(color="#52525b", linewidth=0.9),
-        medianprops=dict(color="#7f1d1d", linewidth=1.8),
-    )
-    for patch, c in zip(bp['boxes'], box_colors):
-        patch.set(facecolor=c, edgecolor="#52525b")
-
-    axF.set_yticks(positions)
-    axF.set_yticklabels(yticklabels, fontsize=9)
-    axF.invert_yaxis()                       # lightest tool at the top
-    axF.set_xscale("log")
-    axF.set_xlim(0.01, 50000)
-    axF.set_xlabel("tool latency (ms, log scale; whiskers = p5–p95)", fontsize=10)
-    axF.set_title("(f) Tool latency  ·  4 orders of magnitude (bash → pytest)",
-                  fontsize=10)
-    axF.grid(True, axis='x', alpha=0.3, which='both')
-    axF.tick_params(axis='x', labelsize=9)
-
-    # Inline median annotations to the right of each box
-    for i, (_, ts) in enumerate(tools_sorted):
-        m = median(ts)
-        label = f"{m:.2f} ms" if m < 1 else (f"{m:.1f} ms" if m < 10 else f"{m:.0f} ms")
-        # place at p95 (right end of whisker)
-        p95 = float(np.percentile(ts, 95))
-        axF.text(p95 * 1.6, i, label, va='center', ha='left',
-                 fontsize=8.5, color="#7f1d1d", fontweight='bold')
-
-    # Polish: spines + suptitle
-    for ax in (axA, axB, axC, axD, axE, axF):
-        for s in ('top', 'right'):
-            ax.spines[s].set_visible(False)
-
-    fig.suptitle(
-        "SWE-bench-B agentic trace statistics (Plan A)\n"
-        "AGX Orin 32GB · locked clocks · 5 frameworks × 30 SWE-smith bug instances across 21 base repos · max_turns=30 · multi-tool harness",
-        fontsize=11.5, y=1.005
-    )
-    fig.tight_layout(pad=1.4, h_pad=1.6, w_pad=1.4, rect=(0, 0, 1, 0.965))
-    fig.savefig(OUT_PDF, bbox_inches="tight", pad_inches=0.05)
-    fig.savefig(OUT_PNG, bbox_inches="tight", pad_inches=0.05, dpi=180)
-    print(f"\nwrote {OUT_PDF}")
-    print(f"wrote {OUT_PNG}")
-    return 0
+    fig.tight_layout(pad=1.2, w_pad=1.6, rect=(0, 0, 1, 0.96))
+    pdf = out_dir / "fig12_swebench.pdf"
+    png = out_dir / "fig12_swebench.png"
+    fig.savefig(pdf, bbox_inches="tight", pad_inches=0.05)
+    fig.savefig(png, bbox_inches="tight", pad_inches=0.05, dpi=180)
+    print(f"wrote {pdf}")
+    print(f"wrote {png}")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
