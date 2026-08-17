@@ -30,11 +30,17 @@ warn()   { echo "  WARN: $*"; WARNINGS=$((WARNINGS+1)); }
 ok()     { echo "  OK:   $*"; }
 
 # ---- Are we already root? if not, is sudo -n available? -------------------
+# NOTE: `sudo -n true` only passes with BLANKET passwordless sudo. The
+# grant_sudo.sh whitelist grants specific commands, so also probe one of
+# the actually-whitelisted commands (jetson_clocks --show is read-only).
 have_sudo=0
 if [ "$(id -u)" -eq 0 ]; then
     have_sudo=1
     SUDO=""
 elif sudo -n true 2>/dev/null; then
+    have_sudo=1
+    SUDO="sudo -n"
+elif sudo -n /usr/bin/jetson_clocks --show >/dev/null 2>&1; then
     have_sudo=1
     SUDO="sudo -n"
 else
