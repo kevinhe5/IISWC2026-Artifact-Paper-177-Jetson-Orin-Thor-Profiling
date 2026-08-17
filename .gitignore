@@ -23,3 +23,7 @@ reproduce/output/
 
 # Large local caches (not for artifact)
 *.tar.gz
+
+# Workflow B data root (models, engines, sweep outputs — created by
+# scripts/collect/orin/prepare_orin.sh when PROFILE_ROOT is not exported)
+/profile/

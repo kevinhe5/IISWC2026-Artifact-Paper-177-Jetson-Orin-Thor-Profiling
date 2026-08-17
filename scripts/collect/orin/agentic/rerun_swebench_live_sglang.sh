@@ -1,7 +1,7 @@
 #!/bin/bash
 # Live SWE-style code-agent — SGLang single-engine on :8000.
 set -e
-DATA=${DATA_ROOT:-/nvme/ispass/jetson-containers/data}
+DATA="${DATA_ROOT:-${PROFILE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)/profile}}"
 BENCH_DIR="${DATA}/benchmarks"
 TS=$(date +"%Y%m%d_%H%M%S")
 

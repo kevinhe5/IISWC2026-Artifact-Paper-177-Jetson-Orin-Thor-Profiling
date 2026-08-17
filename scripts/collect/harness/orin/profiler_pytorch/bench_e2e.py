@@ -275,6 +275,28 @@ def run_e2e_benchmark(
             outputs = model(input_ids, use_cache=True)
             del outputs
         torch.cuda.synchronize()
+    if os.environ.get('TORCH_COMPILE', '').lower() in ('1', 'true', 'yes'):
+        # torch.compile traces/compiles the decode graph (single token +
+        # KV cache) on its first decode-shaped call, which the prefill-only
+        # warmup above never triggers; without this the ~100 s of tracing
+        # lands inside the measured decode window and inflates TPOT ~50x.
+        # Eager runs skip this block, so their measurement path is unchanged.
+        print(f"Compile warmup: decode path...", file=sys.stderr)
+        with torch.no_grad():
+            wu_out = model(input_ids, use_cache=True)
+            wu_past = wu_out.past_key_values
+            wu_tok = torch.argmax(wu_out.logits[:, -1, :], dim=-1, keepdim=True)
+            # 10 steps: the SDPA lowering guards on KV-length alignment
+            # ((1 + cache_len) % 8), so crossing a full mod-8 cycle here
+            # compiles BOTH alignment variants; fewer steps leaves one
+            # variant to recompile (~30 s) inside the measured decode.
+            for _ in range(10):
+                wu_out = model(wu_tok, past_key_values=wu_past, use_cache=True)
+                wu_past = wu_out.past_key_values
+                wu_tok = torch.argmax(wu_out.logits[:, -1, :], dim=-1, keepdim=True)
+            del wu_out, wu_past, wu_tok
+        torch.cuda.synchronize()
+        print(f"Compile warmup complete.", file=sys.stderr)
     gc.collect()
     torch.cuda.empty_cache()
     time.sleep(0.5)

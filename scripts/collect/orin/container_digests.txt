@@ -1,0 +1,19 @@
+# Container image digests (sha256) captured on the paper's collection host.
+# `prepare_orin.sh` compares the freshly-pulled/built images against this file
+# and prints WARN if the digest drifts.  Format: <image>  <local Id sha256>.
+#
+# For dustynv/* images, the RepoDigest is the canonical cross-machine identity;
+# for locally-built images (sglang-orin, bitsandbytes-bench), only the local Id
+# is meaningful and will differ per build — the version-verify step in
+# prepare_orin.sh (2b) covers those.
+#
+# Captured 2026-08-14 on AGX Orin 32 GB, JetPack R36.4.
+# bitsandbytes-bench and sglang-orin Ids re-captured 2026-08-16/17 after the
+# triton/py3.10 rebase fixes (py3.10
+# base + pinned triton 3.2.0; see Dockerfile.bitsandbytes-bench header).
+
+dustynv/vllm:0.8.6-r36.4-cu128-24.04           sha256:b2210294b661acc6e94bc302ce5111d6d0cb01a3815ada0132c105f540fb7a63
+dustynv/tensorrt_llm:0.12-r36.4.0              sha256:a16cf35c600311902d24f36f02d0122fccd7bb9570c02f26f2bde8c21ebb8f72
+dustynv/llama_cpp:b5283-r36.4-cu128-24.04      sha256:178e4173a23fef4e1689d429505baf5156e0e041d564d70fbbfa5697484f9770
+sglang-orin:0.4.6-sm87                         sha256:3b6df189e73ae9cfb89c284cfc5043a9e1727f78ccc2154463e428b1da5dbaa2
+bitsandbytes-bench:r36.4.0                     sha256:08889e8ae915cb9f0b3354580beedf689597ba556d448ae5be636c3e61e92932

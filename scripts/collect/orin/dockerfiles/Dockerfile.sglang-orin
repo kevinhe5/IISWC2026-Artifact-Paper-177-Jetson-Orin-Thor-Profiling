@@ -1,0 +1,183 @@
+# Reference recipe — sglang-orin:0.4.6-sm87
+#
+# Reproduces the SGLang 0.4.6.post2 build used by the paper for AGX Orin
+# (GPU arch sm_87 / Ampere).  The paper runs SGLang with:
+#     --attention-backend triton   (Flashinfer is unstable on sm_87)
+#     --disable-cuda-graph         (SGLang graphs-ON is Thor-only in the paper)
+#     --reasoning-parser qwen3     (for the Qwen3-4B agentic runs)
+#
+# Base: dustynv jetson-containers PyTorch 2.6.0 image for JetPack 6.2 (r36.4).
+# MUST be the 22.04/py3.10 variant, NOT `...-24.04` (py3.12): SGLang 0.4.6's
+# runtime imports triton APIs that only exist in triton ≤3.2 (e.g.
+# triton.runtime.cache.default_cache_dir), and the only Jetson triton 3.2.0
+# wheel is cp310. On the 24.04 base no compatible triton exists and the
+# engine import fails at runtime (after the sweep already started).
+# We install SGLang + its Python deps from source at the exact 0.4.6.post2 tag.
+# ============================================================================
+ARG BASE_IMAGE=dustynv/pytorch:2.6-r36.4.0-cu128
+FROM ${BASE_IMAGE}
+
+# The dustynv base image pins pypi.jetson-ai-lab.io as the sole pip index;
+# it does NOT serve transformers==4.57.3. Point pip at public PyPI here.
+# `PIP_EXTRA_INDEX_URL` keeps the jetson-ai-lab index available for
+# aarch64-CUDA-specific wheels (torch/torchvision/etc) that public PyPI
+# doesn't have, so builds fall back to it only when they need those wheels.
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_INDEX_URL=https://pypi.org/simple/ \
+    PIP_EXTRA_INDEX_URL=https://pypi.jetson-ai-lab.io/jp6/cu128 \
+    CUDA_HOME=/usr/local/cuda \
+    TORCH_CUDA_ARCH_LIST=8.7
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git build-essential ninja-build cmake pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# The prebuilt Jetson sgl-kernel wheel was compiled with GCC 13 and needs
+# GLIBCXX_3.4.32, newer than Ubuntu 22.04's stock libstdc++. Upgrade just
+# libstdc++6 from the toolchain PPA (runtime lib only, fully backward
+# compatible — nothing else in the image is affected).
+RUN apt-get update && apt-get install -y --no-install-recommends software-properties-common \
+ && add-apt-repository -y ppa:ubuntu-toolchain-r/test \
+ && apt-get install -y --only-upgrade libstdc++6 \
+ && rm -rf /var/lib/apt/lists/*
+
+# triton 3.2.0 — the Jetson cp310 wheel from jetson-ai-lab (extra index).
+# MUST be pinned explicitly: pypi.org only ships triton ≥3.5 for aarch64,
+# whose API SGLang 0.4.6 cannot use (default_cache_dir removed in ≥3.3),
+# and the harness runs SGLang with --attention-backend triton, so a broken
+# triton means every sglang cell silently produces no result.
+RUN pip3 install "triton==3.2.0" \
+ && python3 -c "import triton; assert triton.__version__ == '3.2.0', triton.__version__" \
+ && python3 -c "from triton.runtime.cache import default_cache_dir"
+
+# SGLang deps. The source install below is `pip install -e .` WITHOUT the
+# [srt] extras (those drag flashinfer + a full torch re-resolve), so the
+# srt runtime deps it would have pulled are listed here explicitly — the
+# exact set discovered by importing sglang.srt.entrypoints.engine on GPU.
+# The constraints file stops any of them from silently replacing the
+# base image's torch/triton stack (compressed-tensors in particular will
+# pull a PyPI torch without it). Transformers stays pinned to the
+# paper's exact version.
+RUN printf 'torch==2.6.0\ntorchvision==0.21.0\ntransformers==4.57.3\ntriton==3.2.0\n' > /tmp/constraints.txt \
+ && pip3 install --upgrade pip setuptools wheel \
+ && pip3 install -c /tmp/constraints.txt \
+        "transformers==4.57.3" \
+        "uvicorn" \
+        "uvloop==0.17.0" \
+        "fastapi" \
+        "aiohttp" \
+        "orjson" \
+        "psutil" \
+        "pyzmq" \
+        "pillow" \
+        "setproctitle" \
+        "compressed-tensors" \
+        "dill" \
+        "partial-json-parser" \
+        "torchao==0.9.0" \
+        "hf_transfer" \
+        "huggingface_hub[cli]" \
+        "openai>=1.0" \
+        "scikit-build-core" "cmake" "ninja"
+# uvloop is PINNED to 0.17.0: sglang 0.4.6's Engine.generate() calls
+# asyncio.get_event_loop() from a fresh main thread and relies on the
+# auto-create behaviour that uvloop >= 0.18 removed (raises RuntimeError).
+# torchao 0.9.0 is the era version sglang 0.4.6 loads at model init.
+
+# Pin SGLang to the exact 0.4.6.post2 revision the paper used.
+RUN git clone --depth 1 --branch v0.4.6.post2 https://github.com/sgl-project/sglang.git /opt/sglang \
+ && cd /opt/sglang/python \
+ && pip3 install -e .
+
+# sgl-kernel — BUILT FROM SOURCE for sm_87 against this image's torch.
+# SGLang 0.4.6's CUDA code path (is_cuda()==True at runtime) imports
+# sgl_kernel unconditionally in its layernorm/quantization layers, so the
+# package is required even though the Orin sweeps use --attention-backend
+# triton. No prebuilt wheel works here: the jetson-ai-lab cu128 wheel was
+# built against a newer torch (its ops mis-register as HIP — torch's C++
+# dispatch enums are not ABI-stable), the cu126/cu129 wheels need glibc
+# ≥ 2.38 (Ubuntu 24.04), and PyPI ships x86_64 only.
+#
+# The in-tree source (version 0.1.1, sglang's own pin) builds fine on a
+# 32 GB Orin ONCE restricted to sm_87: upstream CMakeLists hard-codes
+# gencodes for sm_75/80/89/90 (+ sm_100/120 when CUDA ≥ 12.8) and CUDA
+# ≥ 12.4 force-enables the FA3/Hopper flash_ops target whose Sm90
+# template instantiations cannot compile for sm_87 — that multi-arch
+# build is what OOM-killed the docker daemon in earlier attempts. The
+# patch below collapses every gencode to compute_87, defuses the FA3
+# force-enable (python side only imports flash_ops for the fa3 attention
+# backend, unused on Orin), and caps nvcc --threads. ~30 min build.
+RUN cd /opt/sglang/sgl-kernel && git submodule update --init --recursive
+RUN cd /opt/sglang/sgl-kernel && python3 - <<'PYEOF'
+import re
+path = "/opt/sglang/sgl-kernel/CMakeLists.txt"
+lines = open(path).readlines()
+out, replaced = [], False
+for ln in lines:
+    if re.search(r'-gencode=arch=compute_(?!87\b)\d+a?', ln):
+        if not replaced:
+            indent = ln[:len(ln) - len(ln.lstrip())]
+            out.append(f'{indent}"-gencode=arch=compute_87,code=sm_87"\n')
+            replaced = True
+        continue
+    out.append(ln.replace('"--threads=32"', '"--threads=2"'))
+open(path, "w").writelines(out)
+assert replaced
+src = open(path).read()
+old = 'if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "12.4" OR SGL_KERNEL_ENABLE_SM90A)'
+assert old in src
+src = src.replace(old, 'if (SGL_KERNEL_ENABLE_SM90A)', 1)
+open(path, "w").write(src)
+assert "compute_87" in src and "compute_100" not in src and "compute_90" not in src
+print("sgl-kernel CMakeLists patched: sm_87-only, FA3 defused, threads=2")
+PYEOF
+RUN cd /opt/sglang/sgl-kernel \
+ && CMAKE_BUILD_PARALLEL_LEVEL=3 MAX_JOBS=3 pip3 install -e . --no-build-isolation
+
+# [artifact patch — 1 line] deep_gemm is Hopper-only (sglang gates its USE
+# on sm==90) but sglang 0.4.6 IMPORTS it unconditionally on any CUDA
+# device; the deep_gemm package that pip pulls in is API-mismatched with
+# sglang 0.4.6 and crashes the whole engine import on Orin (sm_87). Gate
+# the import block itself on sm==90 — behaviour on Hopper is unchanged,
+# and sm_87 never touches deep_gemm.
+RUN sed -i 's/^if is_cuda():$/if is_cuda() and get_device_sm() == 90:  # [artifact patch] deep_gemm import is Hopper-only/' \
+        /opt/sglang/python/sglang/srt/layers/quantization/deep_gemm.py \
+ && grep -q "artifact patch" /opt/sglang/python/sglang/srt/layers/quantization/deep_gemm.py
+
+# [artifact patch — Jetson iGPU] sglang sizes its memory pool from
+# `nvidia-smi --query-gpu=memory.total`, which reports nothing on Tegra
+# (integrated GPU, unified memory) → "ValueError: No GPU memory values
+# found" at engine start. Fall back to total system RAM, which IS the
+# GPU-visible capacity on unified-memory Jetson. get_device_memory_capacity
+# is the single caller of the nvidia-smi probe.
+RUN python3 - <<'PYEOF'
+path = "/opt/sglang/python/sglang/srt/utils.py"
+src = open(path).read()
+old = """    if is_cuda():
+        gpu_mem = get_nvgpu_memory_capacity()"""
+new = """    if is_cuda():
+        try:
+            gpu_mem = get_nvgpu_memory_capacity()
+        except (ValueError, RuntimeError, FileNotFoundError):
+            # [artifact patch] Jetson iGPU: nvidia-smi reports no memory;
+            # unified system RAM is the GPU-visible capacity (MiB).
+            with open("/proc/meminfo") as f:
+                kb = int(next(l for l in f if l.startswith("MemTotal")).split()[1])
+            gpu_mem = kb / 1024"""
+assert old in src, "get_device_memory_capacity pattern not found"
+open(path, "w").write(src.replace(old, new, 1))
+print("jetson memory-capacity patch applied")
+PYEOF
+
+# Sanity check. Note: the full srt engine import cannot run here — docker
+# build has no GPU (default runtime runc), and sglang's is_cuda() gate
+# routes imports down the CPU/vllm fallback in that case. The real
+# engine-on-GPU import check runs in prepare_orin.sh section 2b, which
+# starts this container with --runtime nvidia.
+RUN python3 -c "import sglang; print('sglang', sglang.__version__)" \
+ && python3 -c "import zmq, PIL, uvloop, setproctitle" \
+ && python3 -c "from triton.runtime.cache import default_cache_dir"
+
+# Default: interactive shell; profilers mount benchmarks/ + models/ at runtime.
+CMD ["/bin/bash"]

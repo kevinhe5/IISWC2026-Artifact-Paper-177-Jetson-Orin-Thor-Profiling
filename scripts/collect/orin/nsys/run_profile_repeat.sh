@@ -6,7 +6,8 @@ set -e
 
 FW="$1"
 N_REPEATS="${2:-3}"
-ROOT="${DATA_ROOT:-/nvme/ispass/jetson-containers/data}/benchmarks/nsys_profiles"
+DATA_ROOT="${DATA_ROOT:-${PROFILE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)/profile}}"
+ROOT="${DATA_ROOT}/benchmarks/nsys_profiles"
 LOGDIR="${ROOT}/logs/repeat_${FW}"
 mkdir -p "${LOGDIR}"
 

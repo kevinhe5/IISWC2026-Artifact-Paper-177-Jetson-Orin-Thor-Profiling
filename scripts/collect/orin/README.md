@@ -1,7 +1,45 @@
-# Orin collection scripts
+# Orin collection scripts (Workflow B)
 
 Orin-side collection drivers for the IISWC 2026 "From Chat to
 Agents on the Edge" artifact.
+
+```bash
+cd <repo-root>
+export HF_TOKEN=hf_...                    # Llama-3.2-1B-Instruct is gated
+export PROFILE_ROOT=/path/with/60GB/free  # optional — defaults to <repo>/profile/
+
+bash scripts/collect/orin/prepare_orin.sh           # ~ 2-3 h
+bash scripts/collect/orin/run_orin_collection.sh    # ~ 34 h
+```
+
+(`prepare_orin.sh` also installs the bench harness into
+`$PROFILE_ROOT/benchmarks/` via `install_harness.sh` — no manual copy.)
+
+Then re-render the paper's figures against the freshly collected
+`data/chat/sweep_locked.csv`:
+```bash
+for s in scripts/plot/gen_fig*.py; do python3 "$s" --out figs/; done
+```
+
+Full walkthrough (prerequisites, per-stage timing, verification,
+troubleshooting) is in the repo-root [`WORKFLOW_B.md`](../../../WORKFLOW_B.md).
+
+### Entry points
+
+**Reviewers run exactly two scripts**: `prepare_orin.sh` once, then
+`run_orin_collection.sh`. The second one drives everything below it and
+produces every Orin-side file the plotting scripts read.
+
+| script                          | role                                                                       |
+|---------------------------------|----------------------------------------------------------------------------|
+| `grant_sudo.sh`                 | one-time (as root): installs a sudoers whitelist for the 5 privileged commands the pipeline needs |
+| `prepare_orin.sh`               | one-shot: harness install, docker pulls, container builds, HF snapshots, GGUFs, TRT engines |
+| `install_harness.sh`            | assembles `harness/` into the runnable `$PROFILE_ROOT/benchmarks/` layout (called by prepare) |
+| `run_orin_collection.sh`        | **the** collection driver: preflight → sweep → side grids → repeat → nsys → build |
+| `preflight.sh`                  | swap / swappiness / jetson_clocks / drop_caches (called by the driver)     |
+| `side_sweeps.sh`                | compile / flash-attn / long-context grids (called by the driver's `side` stage) |
+| `build_sweep_locked_orin.py`    | folds raw sweeps into the `data/chat/*.csv` files the plots read (called by the driver's `build` stage) |
+| `dockerfiles/Dockerfile.*`      | reference recipes for `sglang-orin` and `bitsandbytes-bench` images        |
 
 ## Layout
 
@@ -17,8 +55,8 @@ scripts/collect/
 │   ├── thor/profiler_{vllm,sglang,pytorch}/bench_e2e.py  ← Thor-specific (added by Thor)
 │   └── harness_delta/orin/profiler_pytorch/gpu_utils.py  ← Orin-only extended pytorch helpers
 ├── orin/               ← Orin-specific drivers (this dir)
-│   ├── sweep/                    single-run 6×6×fw×quant×model main sweep
-│   ├── repeat15/                 N=15 repeatability drivers (full sweep re-runs)
+│   ├── sweep/                    sweep.sh — THE sweep worker (SWEEP_SCOPE=full
+│   │                             for stage 1, SWEEP_SCOPE=1b for stage-2 reps)
 │   ├── nsys/                     Nsight Systems profile capture + JSON extractors
 │   ├── agentic/                  SWE-bench-live runners (per framework)
 │   └── bw_sweep/                 STREAM-triad bandwidth sweep (CUDA source + driver)
@@ -46,19 +84,15 @@ All Orin scripts assume:
   not supported by the harness)
 - 32 GB unified memory total (constrains Mixtral cell — see
   `sweep/sweep.sh` gpu_layers=16 note)
-- Data root at `/nvme/ispass/jetson-containers/data` (models, sweep
-  outputs, HF cache)
+- Data root at `$PROFILE_ROOT` (models, sweep outputs, HF cache;
+  defaults to `<repo>/profile/` when unset)
 
 ## Per-directory contents
 
-- **sweep/** — `sweep.sh` (main 861-cell 5-fw × 3-model × 4/10 quants ×
-  6×6 pp/gen grid), `run_locked_sweep.sh` (clock-locked wrapper),
-  `resume_locked_sweep.sh` (mid-run resumer using row-exists skip).
-- **repeat15/** — `sweep_1B_only.sh` (per-rep sweep restricted to
-  Llama-3.2-1B for the N=15 repeatability data), `run_reps_4_to_14.sh`
-  (extends reps 3 → 14), `run_rep15.sh` (final rep15 wrapper),
-  `run_n10_sweep.sh` (per-cell N=10 iteration protocol for the Q1
-  headline anchor cells).
+- **sweep/** — `sweep.sh`, the single sweep worker for both measurement
+  stages: `SWEEP_SCOPE=full` (stage 1: 5 fw incl. SGLang × 3 models ×
+  quants × 6×6 pp/gen grid) or `SWEEP_SCOPE=1b` (stage-2 reps: same minus
+  the 8B/Mixtral blocks). Unifies the two historical worker scripts.
 - **nsys/** — `run_profile.sh` / `run_baseline.sh` / `run_profile_repeat.sh`
   (nsys capture drivers); `extract_breakdown.py` /
   `extract_kernel_categories.py` / `extract_per_op.py` /

@@ -6,16 +6,43 @@ All measured numbers used by the paper, organized as CSVs/JSON.
 Each row is either a per-cell measurement or a per-condition aggregate;
 no plotting is required to inspect the data.
 
-## Quick start
+## Two reproduction workflows
+
+**Workflow A — plot-only, from shipped CSVs** (Available badge; ~ 5 min, any x86/ARM machine):
 
 ```bash
 # regenerate any paper figure straight from the shipped data:
 python3 scripts/plot/gen_fig11_pareto.py --out figs/
+# or every figure at once:
+for s in scripts/plot/gen_fig*.py; do python3 "$s" --out figs/; done
 ```
 
 Every figure/table has a generator under `scripts/plot/` that reads only the
 shipped CSV/JSON in `data/` (no embedded numbers). See `scripts/MANIFEST.md`
 for the full script → data → figure map.
+
+**Workflow B — full re-collect on real hardware** (Functional + Reproduced
+badges; ~ 34 h on Orin, ~ 24 h on Thor):
+
+Requires an AGX Orin 32 GB and/or AGX Thor 128 GB Developer Kit. Reproduces
+the raw measurements from scratch, then Workflow A on top of the freshly
+collected `sweep_locked.csv`.
+
+```bash
+# Orin (run from the repo root; same PROFILE_ROOT contract as Thor per AE §5)
+export HF_TOKEN=hf_...                                       # Llama-3.2-1B is gated
+export PROFILE_ROOT=/path/with/60GB/free                     # optional — defaults to <repo>/profile/
+bash scripts/collect/orin/prepare_orin.sh                    # containers + models + engines
+bash scripts/collect/orin/run_orin_collection.sh             # each stage resumable
+for s in scripts/plot/gen_fig*.py; do python3 "$s" --out figs/; done
+
+# Thor
+export PROFILE_ROOT=/path/with/60GB/free
+bash scripts/collect/thor/run_thor_collection.sh
+```
+
+Full step-by-step (prerequisites, timing per stage, verification, and
+troubleshooting) is in **[WORKFLOW_B.md](WORKFLOW_B.md)**.
 
 ## Layout
 

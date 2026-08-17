@@ -9,8 +9,8 @@ if [ -z "$FW" ]; then
     exit 1
 fi
 
-ROOT="${DATA_ROOT:-/nvme/ispass/jetson-containers/data}/benchmarks/nsys_profiles"
-DATA_ROOT="${DATA_ROOT:-/nvme/ispass/jetson-containers/data}"
+DATA_ROOT="${DATA_ROOT:-${PROFILE_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)/profile}}"
+ROOT="${DATA_ROOT}/benchmarks/nsys_profiles"
 NSYS_ROOT="/opt/nvidia/nsight-systems/2024.5.4"
 NSYS_BIN="${NSYS_ROOT}/target-linux-tegra-armv8/nsys"
 

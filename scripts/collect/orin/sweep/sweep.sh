@@ -1,10 +1,21 @@
 #!/bin/bash
-# Master sweep script: prefill × decode × quantization × framework
-# Saves results incrementally to CSV for analysis
+# Unified sweep worker: prefill × decode × quantization × framework.
+# Saves results incrementally to CSV (resume-safe: existing rows are skipped).
+#
+# Scope (set by run_orin_collection.sh):
+#   SWEEP_SCOPE=full  (default)  all cells: 5 frameworks (incl. SGLang) ×
+#                                {Llama-3.2-1B, Llama-3.1-8B, Mixtral} ×
+#                                quants × pp/gen grid — the stage-1 master pass
+#   SWEEP_SCOPE=1b               skips the 8B/Mixtral blocks — the per-rep
+#                                stage-2 repeatability pass (~7 h each)
+#
+# History: this file unifies the original master sweep script (which had no
+# SGLang runner) and the per-rep 1B script; the full scope now includes the
+# SGLang cells that previously existed only in the rep passes.
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-DATA_DIR="${DATA_ROOT:-/nvme/ispass/jetson-containers/data}"
+DATA_DIR="${DATA_ROOT:-${PROFILE_ROOT:-$(cd "${SCRIPT_DIR}/../../../.." && pwd)/profile}}"
 HF_DIR="${DATA_DIR}/models/hf_full"
 MODELS_DIR="${DATA_DIR}/models"
 ENGINES_DIR="${DATA_DIR}/models/trtllm_engines"
@@ -27,7 +38,11 @@ GGUF_DIR="${MODELS_DIR}/gguf"
 # ========================================================================
 SWAP_USED_KB=$(awk '/^SwapTotal:/ {t=$2} /^SwapFree:/ {f=$2} END {print t-f}' /proc/meminfo)
 SWAPPINESS=$(cat /proc/sys/vm/swappiness)
-if [ "$SWAP_USED_KB" -gt 3145728 ]; then   # > 3 GB
+# Full master pass keeps the original strict 3 GB limit; the long rep
+# series historically tolerated up to 5 GB of pre-existing swap.
+SWAP_LIMIT_KB=3145728
+[ "${SWEEP_SCOPE:-full}" = "1b" ] && SWAP_LIMIT_KB=5242880
+if [ "$SWAP_USED_KB" -gt "$SWAP_LIMIT_KB" ]; then
     echo "ERROR: swap in use (${SWAP_USED_KB} KB > 3 GB). Run 'sudo ./preflight.sh'." >&2
     echo "  Current swap devices:" >&2
     swapon --show 2>&1 | sed 's/^/    /' >&2
@@ -92,8 +107,17 @@ _current_mem_avail_kb() {
 # Requires sudo -n drop_caches OR gracefully no-ops if not available.
 _between_runs() {
     sync
-    # Try to drop page cache if we have passwordless sudo; otherwise skip silently.
-    sudo -n sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null || true
+    # Loud once-per-run warning instead of a silent no-op: on unified-memory
+    # Jetson, an undropped page cache can starve GPU allocations mid-sweep
+    # (observed: TRT engine build tactic OOM with 22 GB of page cache held).
+    if ! sudo -n sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null; then
+        if [ -z "${_DROP_CACHES_WARNED:-}" ]; then
+            _DROP_CACHES_WARNED=1
+            echo "  ⚠ WARNING: cannot drop page caches (no passwordless sudo)." >&2
+            echo "    Free-memory pressure may distort results or fail engine builds." >&2
+            echo "    Re-run under sudo -E, or grant NOPASSWD for: sh -c 'echo 3 > /proc/sys/vm/drop_caches'" >&2
+        fi
+    fi
 
     local cur_swap=$(_current_swap_kb)
     local delta=$((cur_swap - SWAP_BASELINE_KB))
@@ -275,6 +299,7 @@ run_trtllm_8b() {
 }
 
 echo ""
+if [ "${SWEEP_SCOPE:-full}" = "full" ]; then  # 8B/Mixtral — full scope only
 echo "=== TRT-LLM Sweep (Llama-3.1-8B) ==="
 # 8B engines built with MAX_SEQ=5120, so cap prefill+gen at ~5120.
 for quant in fp16 int8 int4; do
@@ -289,6 +314,7 @@ for quant in fp16 int8 int4; do
         done
     done
 done
+fi  # end 8B/Mixtral (full scope only)
 
 # ============================================================
 # vLLM Sweep (Llama-3.2-1B: FP16, GGUF Q8_0, Q4_K_M, Q4_0)
@@ -343,6 +369,7 @@ run_vllm_8b() {
 }
 
 echo ""
+if [ "${SWEEP_SCOPE:-full}" = "full" ]; then  # 8B/Mixtral — full scope only
 echo "=== vLLM Sweep (Llama-3.1-8B) ==="
 if [ -n "$LLAMA8B_TOK" ]; then
     for pp in "${PREFILL_LENGTHS[@]}"; do
@@ -360,6 +387,7 @@ if [ -n "$LLAMA8B_TOK" ]; then
 else
     echo "  Llama-3.1-8B HF dir not found"
 fi
+fi  # end 8B/Mixtral (full scope only)
 
 # ============================================================
 # llama.cpp Sweep (Llama-3.2-1B: F16, Q8_0, Q6_K, Q5_K_M, Q4_K_M, Q4_0, Q3_K_L)
@@ -409,6 +437,36 @@ print(info.get('context_length', 8192))
 }
 
 echo ""
+
+SGLANG_IMAGE="sglang-orin:0.4.6-sm87"
+
+# ---- SGLang runner ----
+run_sglang() {
+    local model_arg="$1" mount_arg="$2" quant="$3" pp="$4" gen="$5"
+    run_exists "sglang" "$quant" "$pp" "$gen" && { echo "  [skip] sglang ${quant} pp=${pp} gen=${gen}"; return; }
+    echo "  sglang ${quant} pp=${pp} gen=${gen}..."
+    local json
+    json=$(docker run ${DOCKER_COMMON} ${mount_arg} \
+        -v "${BENCH_DIR}:/benchmarks" -e PYTHONPATH=/benchmarks/profiler_sglang \
+        "${SGLANG_IMAGE}" \
+        python3 /benchmarks/profiler_sglang/bench_e2e.py \
+            "${model_arg}" "$pp" "$gen" 1 \
+        2>&1 | grep '^{' | tail -1)
+    append_csv "sglang" "Llama-3.2-1B" "$quant" "$pp" "$gen" "$json"
+    _between_runs
+}
+
+echo ""
+echo "=== SGLang Sweep (Llama-3.2-1B) ==="
+for pp in "${PREFILL_LENGTHS[@]}"; do
+    for gen in "${DECODE_LENGTHS[@]}"; do
+        # SGLang: fp16 from HF (no GGUF support in profiler)
+        run_sglang "/hf_models/models--meta-llama--Llama-3.2-1B-Instruct/snapshots/$(basename $LLAMA_SNAP)" \
+            "-v ${HF_DIR}:/hf_models" "fp16" "$pp" "$gen"
+    done
+done
+
+
 echo "=== llama.cpp Sweep ==="
 declare -A LLAMA_GGUFS=(
     ["f16"]="Llama-3.2-1B-Instruct-f16.gguf"
@@ -432,6 +490,7 @@ done
 
 # Llama-3.1-8B GGUF (Q4_K_M staged)
 echo ""
+if [ "${SWEEP_SCOPE:-full}" = "full" ]; then  # 8B/Mixtral — full scope only
 echo "=== llama.cpp Sweep (Llama-3.1-8B) ==="
 LLAMA8B_GGUF="Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
 if [ -f "${GGUF_DIR}/${LLAMA8B_GGUF}" ]; then
@@ -449,6 +508,8 @@ fi
 #   Q4_K_M ~26 GB (partial offload, gpu_layers=16 — labeled "Q4_K_M_gpu16"
 #                 to distinguish from full-GPU runs in the dataset)
 echo ""
+fi  # end 8B/Mixtral (full scope only)
+if [ "${SWEEP_SCOPE:-full}" = "full" ]; then  # 8B/Mixtral — full scope only
 echo "=== llama.cpp Mixtral-8x7B Sweep ==="
 MIXTRAL_GGUF_Q3="Mixtral-8x7B-Instruct-v0.1-Q3_K_M.gguf"
 MIXTRAL_GGUF_Q4="Mixtral-8x7B-Instruct-v0.1-Q4_K_M.gguf"
@@ -486,6 +547,8 @@ run_vllm_mixtral() {
 }
 
 echo ""
+fi  # end 8B/Mixtral (full scope only)
+if [ "${SWEEP_SCOPE:-full}" = "full" ]; then  # 8B/Mixtral — full scope only
 echo "=== vLLM Mixtral-8x7B Sweep ==="
 for mx_pair in "${MIXTRAL_GGUF_Q3}:gguf_Q3_K_M" "${MIXTRAL_GGUF_Q4}:gguf_Q4_K_M"; do
     mx_file="${mx_pair%:*}"; mx_quant="${mx_pair#*:}"
@@ -499,6 +562,7 @@ for mx_pair in "${MIXTRAL_GGUF_Q3}:gguf_Q3_K_M" "${MIXTRAL_GGUF_Q4}:gguf_Q4_K_M"
         echo "  [skip] Mixtral GGUF not found: ${mx_file}"
     fi
 done
+fi  # end 8B/Mixtral (full scope only)
 
 # ============================================================
 # PyTorch Sweep (Llama-3.2-1B: BF16, BF16+compile)
@@ -565,6 +629,7 @@ run_pytorch_8b() {
 }
 
 echo ""
+if [ "${SWEEP_SCOPE:-full}" = "full" ]; then  # 8B/Mixtral — full scope only
 echo "=== PyTorch Sweep (Llama-3.1-8B: 4bit, 8bit — no bf16, weights alone are 16 GB) ==="
 if [ -n "$LLAMA8B_TOK" ]; then
     for quant in 4bit 8bit; do
@@ -577,6 +642,7 @@ if [ -n "$LLAMA8B_TOK" ]; then
 else
     echo "  Llama-3.1-8B HF dir not found"
 fi
+fi  # end 8B/Mixtral (full scope only)
 
 # ============================================================
 # Summary

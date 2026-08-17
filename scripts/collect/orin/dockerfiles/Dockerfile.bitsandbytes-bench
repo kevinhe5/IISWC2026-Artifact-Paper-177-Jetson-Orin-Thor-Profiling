@@ -1,0 +1,92 @@
+# Reference recipe — bitsandbytes-bench:r36.4.0
+#
+# PyTorch-eager (HuggingFace transformers) framework container for the AGX
+# Orin sweep. Uses:
+#     python         3.10                  (Ubuntu 22.04 base)
+#     torch          2.6.0                 (dustynv base image)
+#     triton         3.2.0                 (Jetson cp310 wheel — REQUIRED for
+#                                           the torch.compile / inductor cells)
+#     transformers   4.57.3
+#     bitsandbytes   0.45.4.dev0           (source build for CUDA 12.8 / sm_87)
+#     accelerate     1.4.0
+#     numpy          2.2.3
+#
+# Base: dustynv jetson-containers PyTorch 2.6 image (CUDA 12.8, sm_87).
+# MUST be the 22.04/py3.10 variant, NOT `...-24.04` (py3.12): torch 2.6's
+# inductor hard-requires triton 3.2.x (imports AttrsDescriptor, removed in
+# triton ≥3.3), and the only Jetson triton 3.2.0 wheel is cp310. On the
+# 24.04 base no compatible triton exists and every torch.compile cell fails
+# with "Cannot find a working triton installation".
+# ============================================================================
+ARG BASE_IMAGE=dustynv/pytorch:2.6-r36.4.0-cu128
+FROM ${BASE_IMAGE}
+
+# The dustynv base image pins the jetson-ai-lab index as the sole pip index;
+# it does NOT serve transformers==4.57.3 / accelerate==1.4.0. Point pip at
+# public PyPI as PRIMARY and keep jetson-ai-lab as extra so Jetson-built
+# aarch64-CUDA wheels (triton) still resolve.
+# NOTE: the index moved — pypi.jetson-ai-lab.dev is NXDOMAIN since ~Aug 2026;
+# pypi.jetson-ai-lab.io is the live mirror.
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_INDEX_URL=https://pypi.org/simple/ \
+    PIP_EXTRA_INDEX_URL=https://pypi.jetson-ai-lab.io/jp6/cu128 \
+    CUDA_HOME=/usr/local/cuda \
+    BNB_CUDA_VERSION=128 \
+    TORCH_CUDA_ARCH_LIST=8.7
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git build-essential ninja-build cmake pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# triton 3.2.0 — the Jetson cp310 wheel from jetson-ai-lab (sha256 65edaa52…).
+# Pinned FIRST and alone so a resolver change elsewhere can never drop it.
+# torch 2.6 inductor requires exactly the 3.2.x API line; pypi.org has no
+# aarch64 wheel older than 3.5, so the jetson-ai-lab index is the only source.
+RUN pip3 install "triton==3.2.0" \
+ && python3 -c "import triton; assert triton.__version__ == '3.2.0', triton.__version__"
+
+# Core stack — pinned to the versions in manifests/framework_versions.csv
+RUN pip3 install --upgrade pip setuptools wheel \
+ && pip3 install \
+        "transformers==4.57.3" \
+        "accelerate==1.4.0" \
+        "numpy==2.2.3" \
+        "huggingface_hub[cli]" \
+        "hf_transfer" \
+        "sentencepiece" \
+        "safetensors" \
+        "protobuf"
+
+# bitsandbytes 0.45.4.dev0 — must be built from source for CUDA 12.8 / sm_87.
+# The prebuilt PyPI wheels do not carry the sm_87 kernel binaries.
+#
+# Pinned to commit e1f515cd9da400b666df4cfb4da605abffdfb755 — the last commit
+# on `main` whose `bitsandbytes/__init__.py` reports __version__ = "0.45.4.dev0"
+# (the exact string in manifests/framework_versions.csv).  Diff between this
+# commit and the tagged `0.45.4` release is only `bitsandbytes/__init__.py`
+# (version-string bump) and `setup.py` — the entire `csrc/` CUDA kernel tree
+# is bit-identical, so the compiled .so for sm_87 matches the paper's build
+# byte-for-byte.
+#
+# `--branch 0.45.4 --depth 10` anchors the shallow clone at the 0.45.4 tag
+# and includes the 9 commits preceding it, which is enough headroom to reach
+# e1f515c (the tag's immediate parent commit).  The previous `--depth 200`
+# variant (Bug 23) anchored at main HEAD instead of the tag, and 200 commits
+# on main don't reach back to the 0.45.4 release window.
+ENV BNB_COMMIT=e1f515cd9da400b666df4cfb4da605abffdfb755
+RUN git clone --branch 0.45.4 --depth 10 \
+        https://github.com/bitsandbytes-foundation/bitsandbytes.git /opt/bnb \
+ && cd /opt/bnb \
+ && git checkout ${BNB_COMMIT} \
+ && cmake -DCOMPUTE_BACKEND=cuda -DCOMPUTE_CAPABILITY=87 -S . \
+ && make -j"$(nproc)" \
+ && pip3 install -e .
+
+RUN python3 -c "import torch, triton, transformers, bitsandbytes as bnb; \
+    print('torch', torch.__version__, 'cu', torch.version.cuda); \
+    print('triton', triton.__version__); \
+    print('transformers', transformers.__version__); \
+    print('bnb', bnb.__version__)"
+
+CMD ["/bin/bash"]
