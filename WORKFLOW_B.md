@@ -50,6 +50,15 @@ sudo for exactly those five commands (nothing broader; the file is
 `visudo`-validated before install). Undo afterwards with
 `sudo rm /etc/sudoers.d/orin-artifact`.
 
+Preflight tries each privileged command individually, so partial/site
+whitelists are honored too. It hard-fails ONLY on measurement-critical,
+verifiable conditions: GPU/EMC clocks not locked, power mode not MAXN,
+excess swap, or missing data layout. The hygiene extras (cache drop,
+swappiness, EMC verification) degrade to loud warnings and the run
+proceeds. Minimum root need if you skip grant_sudo.sh entirely: have an
+administrator run `sudo jetson_clocks` once per boot (plus
+`sudo nvpmodel -m 0` if the mode isn't MAXN).
+
 *Alternative:* run the collection itself under `sudo -E` — but then
 everything under `PROFILE_ROOT` and the HF cache in your home directory
 end up root-owned, which breaks later non-root runs; prefer the
